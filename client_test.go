@@ -1,55 +1,10 @@
 package bandwidth
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
-
-func expect(t *testing.T, value interface{}, expected interface{}) {
-	if value != expected {
-		t.Errorf("Expected %v - Got %v", expected, value)
-	}
-}
-
-func shouldFail(t *testing.T, action func() (interface{}, error)) error {
-	_, err := action()
-	if err == nil {
-		t.Fatal("Should fail here")
-		return nil
-	}
-	return err
-}
-
-func getAPI() *Client {
-	api, _ := New("userId", "apiToken", "apiSecret")
-	return api
-}
-
-func createFakeResponse(body string, statusCode int) *http.Response {
-	return &http.Response{StatusCode: statusCode,
-		Body: nopCloser{bytes.NewReader([]byte(body))}}
-}
-
-func startFakeServer(handler func(w http.ResponseWriter, r *http.Request)) (*httptest.Server, *Client) {
-	api := getAPI()
-	fakeServer := httptest.NewServer(http.HandlerFunc(handler))
-	api.APIEndPoint = fakeServer.URL
-	return fakeServer, api
-}
-
-func readText(t *testing.T, r io.Reader) string {
-	text, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Error("Error on reading content")
-		return ""
-	}
-	return string(text)
-}
 
 func TestNew(t *testing.T) {
 	api, _ := New("userId", "apiToken", "apiSecret")
@@ -84,7 +39,6 @@ func TestNewFail(t *testing.T) {
 	shouldFail(t, func() (interface{}, error) { return New("userID", "apiToken", "") })
 }
 
-
 func TestConcatUserPath(t *testing.T) {
 	api := getAPI()
 	if api.concatUserPath("test") != "/users/userId/test" {
@@ -107,17 +61,16 @@ func TestPrepareURL(t *testing.T) {
 
 func TestCreateRequest(t *testing.T) {
 	api := getAPI()
-	req, err := api.createRequest("GET", "/test")
+	req, err := api.createRequest(http.MethodGet, "/test")
 	if err != nil {
 		t.Fatal(err)
 	}
 	expect(t, req.URL.String(), "https://api.catapult.inetwork.com/v1/test")
-	expect(t, req.Method, "GET")
+	expect(t, req.Method, http.MethodGet)
 	expect(t, req.Header.Get("Accept"), "application/json")
 	expect(t, req.Header.Get("User-Agent"), fmt.Sprintf("go-bandwidth-v%s", Version))
 	expect(t, req.Header.Get("Authorization"), "Basic YXBpVG9rZW46YXBpU2VjcmV0")
 }
-
 
 func TestCheckResponse(t *testing.T) {
 	api := getAPI()
@@ -139,43 +92,34 @@ func TestCheckResponseFail(t *testing.T) {
 }
 
 func TestMakeRequest(t *testing.T) {
-	fakeServer, api := startFakeServer(func(w http.ResponseWriter, r *http.Request) {
-		expect(t, r.URL.String(), "/v1/test")
-		expect(t, r.Method, "GET")
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{"test": "test"}`)
-	})
-	defer fakeServer.Close()
-	result, _ := api.makeRequest("GET", "/test")
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:  "/v1/test",
+		ContentToSend: `{"test": "test"}`}})
+	defer server.Close()
+	result, _ := api.makeRequest(http.MethodGet, "/test")
 	expect(t, result.(map[string]interface{})["test"], "test")
 }
 
 func TestMakeRequestWithQuery(t *testing.T) {
-	fakeServer, api := startFakeServer(func(w http.ResponseWriter, r *http.Request) {
-		expect(t, r.URL.String(), "/v1/test?field1=value1&field2=value+with+space")
-		expect(t, r.Method, "GET")
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{"test": "test"}`)
-	})
-	defer fakeServer.Close()
-	result, _ := api.makeRequest("GET", "/test", map[string]interface{}{
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:  "/v1/test?field1=value1&field2=value+with+space",
+		ContentToSend: `{"test": "test"}`}})
+	defer server.Close()
+	result, _ := api.makeRequest(http.MethodGet, "/test", map[string]interface{}{
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
 }
 
 func TestMakeRequestWithBody(t *testing.T) {
-	fakeServer, api := startFakeServer(func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
-		expect(t, r.URL.String(), "/v1/test")
-		expect(t, r.Method, "POST")
-		expect(t, r.Header.Get("Content-Type"), "application/json")
-		expect(t, readText(t, r.Body), `{"field1":"value1","field2":"value with space"}`)
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{"test": "test"}`)
-	})
-	defer fakeServer.Close()
-	result, _ := api.makeRequest("POST", "/test", map[string]interface{}{
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:     "/v1/test",
+		Method:           http.MethodPost,
+		EstimatedHeaders: map[string]string{"Content-Type": "application/json"},
+		EstimatedContent: `{"field1":"value1","field2":"value with space"}`,
+		ContentToSend:    `{"test": "test"}`}})
+	defer server.Close()
+	result, _ := api.makeRequest(http.MethodPost, "/test", map[string]interface{}{
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
