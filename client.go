@@ -81,15 +81,18 @@ func (c* Client) checkResponse(response *http.Response)(interface{}, error){
 	if response.StatusCode >= 200 && response.StatusCode < 400 {
 		return body, nil
 	}
-	errorBody := body.(map[string]interface{})
-	message := errorBody["message"].(string)
-	if message == "" {
-		message = errorBody["code"].(string)
+	errorBody := make(map[string]interface{})
+	if(body != nil){
+		errorBody = body.(map[string]interface{})
 	}
-	if message == "" {
+	message := errorBody["message"]
+	if message == nil {
+		message = errorBody["code"]
+	}
+	if message == nil {
 		return nil, fmt.Errorf("Http code %d", response.StatusCode)
 	}
-	return nil, errors.New(message)
+	return nil, errors.New(message.(string))
 }
 
 
