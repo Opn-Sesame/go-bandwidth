@@ -1,26 +1,25 @@
 package bandwidth
 
 import (
-	"fmt"
-	"net/http"
-	"net/url"
-	"errors"
-	"encoding/base64"
+	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
-	"bytes"
+	"net/http"
+	"net/url"
 )
 
 // Client is main API object
-type Client struct{
+type Client struct {
 	UserID, APIToken, APISecret string
-	APIVersion string
-	APIEndPoint string
+	APIVersion                  string
+	APIEndPoint                 string
 }
 
 // New creates new instances of api
-func New(userID, apiToken, apiSecret string, other... string) (*Client, error){
+func New(userID, apiToken, apiSecret string, other ...string) (*Client, error) {
 	apiVersion := "v1"
 	apiEndPoint := "https://api.catapult.inetwork.com"
 	if userID == "" || apiToken == "" || apiSecret == "" {
@@ -33,39 +32,36 @@ func New(userID, apiToken, apiSecret string, other... string) (*Client, error){
 	if l > 0 {
 		apiVersion = other[0]
 	}
-	client := &Client {userID, apiToken, apiSecret, apiVersion, apiEndPoint}
+	client := &Client{userID, apiToken, apiSecret, apiVersion, apiEndPoint}
 	return client, nil
 }
 
-
-func (c *Client) concatUserPath(path string) string{
+func (c *Client) concatUserPath(path string) string {
 	if path[0] != '/' {
 		path = "/" + path
 	}
 	return fmt.Sprintf("/users/%s%s", c.UserID, path)
 }
 
-func (c *Client) prepareURL(path string) string{
+func (c *Client) prepareURL(path string) string {
 	if path[0] != '/' {
 		path = "/" + path
 	}
 	return fmt.Sprintf("%s/%s%s", c.APIEndPoint, c.APIVersion, path)
 }
 
-func (c* Client) createRequest(method, path string) (*http.Request, error){
+func (c *Client) createRequest(method, path string) (*http.Request, error) {
 	request, err := http.NewRequest(method, c.prepareURL(path), nil)
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Add("Authorization", fmt.Sprintf("Basic %s",
-		base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", c.APIToken, c.APISecret)))))
-
-	request.Header.Add("Accept", "application/json")
-	request.Header.Add("User-Agent", fmt.Sprintf("go-bandwidth-v%s", Version))
+	request.SetBasicAuth(c.APIToken, c.APISecret)
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("User-Agent", fmt.Sprintf("go-bandwidth-v%s", Version))
 	return request, nil
 }
 
-func (c* Client) checkResponse(response *http.Response)(interface{}, error){
+func (c *Client) checkResponse(response *http.Response) (interface{}, error) {
 	defer response.Body.Close()
 	var body interface{}
 	rawJSON, err := ioutil.ReadAll(response.Body)
@@ -82,7 +78,7 @@ func (c* Client) checkResponse(response *http.Response)(interface{}, error){
 		return body, nil
 	}
 	errorBody := make(map[string]interface{})
-	if(body != nil){
+	if body != nil {
 		errorBody = body.(map[string]interface{})
 	}
 	message := errorBody["message"]
@@ -95,15 +91,14 @@ func (c* Client) checkResponse(response *http.Response)(interface{}, error){
 	return nil, errors.New(message.(string))
 }
 
-
-func (c *Client) makeRequest(method, path string, data... interface{}) (interface{}, error){
-    request, err := c.createRequest(method, path)
+func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, error) {
+	request, err := c.createRequest(method, path)
 	if err != nil {
 		return nil, err
 	}
 	if len(data) > 0 {
 		if method == "GET" {
-			item := data[0].(map[string] interface{})
+			item := data[0].(map[string]interface{})
 			query := make(url.Values)
 			for key, value := range item {
 				query[key] = []string{value.(string)}
@@ -127,7 +122,7 @@ func (c *Client) makeRequest(method, path string, data... interface{}) (interfac
 }
 
 type nopCloser struct {
-    io.Reader
+	io.Reader
 }
 
 func (nopCloser) Close() error { return nil }

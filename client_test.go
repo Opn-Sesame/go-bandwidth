@@ -1,9 +1,14 @@
 package bandwidth
 
-import "testing"
-import "fmt"
-import "net/http"
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
 
 func expect(t *testing.T, value interface{}, expected interface{}) {
 	if value != expected {
@@ -63,6 +68,22 @@ func createFakeResponse(body string, statusCode int) *http.Response {
 		Body: nopCloser{bytes.NewReader([]byte(body))}}
 }
 
+func startFakeServer(handler func(w http.ResponseWriter, r *http.Request)) (*httptest.Server, *Client) {
+	api := getAPI()
+	fakeServer := httptest.NewServer(http.HandlerFunc(handler))
+	api.APIEndPoint = fakeServer.URL
+	return fakeServer, api
+}
+
+func readText(t *testing.T, r io.Reader) string {
+	text, err := ioutil.ReadAll(r)
+	if err != nil {
+		t.Error("Error on reading content")
+		return ""
+	}
+	return string(text)
+}
+
 func TestConcatUserPath(t *testing.T) {
 	api := getAPI()
 	if api.concatUserPath("test") != "/users/userId/test" {
@@ -103,17 +124,67 @@ func TestCreateRequestFail(t *testing.T) {
 
 func TestCheckResponse(t *testing.T) {
 	api := getAPI()
-	data, _ := api.checkResponse(createFakeResponse("{\"test\": \"test\"}", 200))
+	data, _ := api.checkResponse(createFakeResponse(`{"test": "test"}`, 200))
 	result := data.(map[string]interface{})
 	expect(t, result["test"].(string), "test")
 }
 
 func TestCheckResponseFail(t *testing.T) {
 	api := getAPI()
-	err := shouldFail(t, func() (interface{}, error) { return api.checkResponse(createFakeResponse("{\"code\": \"400\", \"message\": \"some error\"}", 400))})
+	err := shouldFail(t, func() (interface{}, error) {
+		return api.checkResponse(createFakeResponse(`{"code": "400", "message": "some error"}`, 400))
+	})
 	expect(t, err.Error(), "some error")
-	err = shouldFail(t, func() (interface{}, error) { return api.checkResponse(createFakeResponse("{\"code\": \"400\"}", 400))})
+	err = shouldFail(t, func() (interface{}, error) { return api.checkResponse(createFakeResponse(`{"code": "400"}`, 400)) })
 	expect(t, err.Error(), "400")
-	err = shouldFail(t, func() (interface{}, error) { return api.checkResponse(createFakeResponse("", 400))})
+	err = shouldFail(t, func() (interface{}, error) { return api.checkResponse(createFakeResponse("", 400)) })
 	expect(t, err.Error(), "Http code 400")
+}
+
+func TestMakeRequest(t *testing.T) {
+	fakeServer, api := startFakeServer(func(w http.ResponseWriter, r *http.Request) {
+		expect(t, r.URL.String(), "/v1/test")
+		expect(t, r.Method, "GET")
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"test": "test"}`)
+	})
+	defer fakeServer.Close()
+	result, _ := api.makeRequest("GET", "/test")
+	expect(t, result.(map[string]interface{})["test"], "test")
+}
+
+func TestMakeRequestWithQuery(t *testing.T) {
+	fakeServer, api := startFakeServer(func(w http.ResponseWriter, r *http.Request) {
+		expect(t, r.URL.String(), "/v1/test?field1=value1&field2=value+with+space")
+		expect(t, r.Method, "GET")
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"test": "test"}`)
+	})
+	defer fakeServer.Close()
+	result, _ := api.makeRequest("GET", "/test", map[string]interface{}{
+		"field1": "value1",
+		"field2": "value with space"})
+	expect(t, result.(map[string]interface{})["test"], "test")
+}
+
+func TestMakeRequestWithBody(t *testing.T) {
+	fakeServer, api := startFakeServer(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		expect(t, r.URL.String(), "/v1/test")
+		expect(t, r.Method, "POST")
+		expect(t, r.Header.Get("Content-Type"), "application/json")
+		expect(t, readText(t, r.Body), `{"field1":"value1","field2":"value with space"}`)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, `{"test": "test"}`)
+	})
+	defer fakeServer.Close()
+	result, _ := api.makeRequest("POST", "/test", map[string]interface{}{
+		"field1": "value1",
+		"field2": "value with space"})
+	expect(t, result.(map[string]interface{})["test"], "test")
+}
+
+func TestMakeRequestFail(t *testing.T) {
+	api := getAPI()
+	shouldFail(t, func() (interface{}, error) { return api.makeRequest("INVALID\nMETHOD\n", "/test") })
 }
