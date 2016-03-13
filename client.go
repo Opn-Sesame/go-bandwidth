@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"bytes"
 )
 
 // Client is main API object
@@ -60,7 +61,7 @@ func (c* Client) createRequest(method, path string) (*http.Request, error){
 		base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", c.APIToken, c.APISecret)))))
 
 	request.Header.Add("Accept", "application/json")
-	request.Header.Add("User-Agent", "go-bandwidth-v0.0") //TODO add version
+	request.Header.Add("User-Agent", fmt.Sprintf("go-bandwidth-v%s", Version))
 	return request, nil
 }
 
@@ -99,17 +100,19 @@ func (c *Client) makeRequest(method, path string, data... interface{}) (interfac
 	}
 	if len(data) > 0 {
 		if method == "GET" {
-			item := data.(map[string] interface{})
-			var query url.Values
-			request.URL.Query
-		}
-		else {
+			item := data[0].(map[string] interface{})
+			query := make(url.Values)
+			for key, value := range item {
+				query[key] = []string{value.(string)}
+			}
+			request.URL.RawQuery = query.Encode()
+		} else {
 			request.Header.Set("Content-Type", "application/json")
-			rawJSON, error := json.Marshal(data[0])
+			rawJSON, err := json.Marshal(data[0])
 			if err != nil {
 				return nil, err
 			}
-			request.Body = nopCloser{rawJSON}
+			request.Body = nopCloser{bytes.NewReader(rawJSON)}
 		}
 	}
 	client := &http.Client{}
@@ -124,4 +127,4 @@ type nopCloser struct {
     io.Reader
 }
 
-func (nopCloser) Close() os.Error { return nil }
+func (nopCloser) Close() error { return nil }
