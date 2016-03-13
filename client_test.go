@@ -1,6 +1,7 @@
 package bandwidth
 
 import "testing"
+import "fmt"
 
 func TestNew(t *testing.T) {
 	api, _ := New("userId", "apiToken", "apiSecret")
@@ -71,5 +72,55 @@ func TestNewFail(t *testing.T) {
 	_, err = New("userId", "apiToken", "")
 	if err == nil {
 		t.Error("Should fail with missing ApiSecret")
+	}
+}
+
+
+
+func getAPI() *Client{
+	api, _ := New("userId", "apiToken", "apiSecret")
+	return api
+}
+
+func TestConcatUserPath(t *testing.T) {
+	api := getAPI()
+	if api.concatUserPath("test") != "/users/userId/test" {
+		t.Error("Should return valid path (without slash)")
+	}
+	if api.concatUserPath("/test") != "/users/userId/test" {
+		t.Error("Should return valid path (with slash)")
+	}
+}
+
+func TestPrepareURL(t *testing.T) {
+	api := getAPI()
+	if api.prepareURL("test") != "https://api.catapult.inetwork.com/v1/test" {
+		t.Error("Should return valid url (without slash)")
+	}
+	if api.prepareURL("/test") != "https://api.catapult.inetwork.com/v1/test" {
+		t.Error("Should return valid url (with slash)")
+	}
+}
+
+func TestCreateRequest(t *testing.T) {
+	api := getAPI()
+	req, err := api.createRequest("GET", "/test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if req.URL.String() != "https://api.catapult.inetwork.com/v1/test" {
+		t.Errorf("Invalid request url %s", req.URL.String())
+	}
+	if req.Method != "GET" {
+		t.Errorf("Invalid request method %s", req.Method)
+	}
+	if req.Header.Get("Accept") != "application/json" {
+		t.Errorf("Invalid header Accept %s", req.Header.Get("Accept"))
+	}
+	if req.Header.Get("User-Agent") != fmt.Sprintf("go-bandwidth-v%s", Version) {
+		t.Errorf("Invalid header User-Agent %s", req.Header.Get("User-Agent"))
+	}
+	if req.Header.Get("Authorization") != "Basic YXBpVG9rZW46YXBpU2VjcmV0" {
+		t.Errorf("Invalid header Authorization %s", req.Header.Get("Authorization"))
 	}
 }

@@ -1,8 +1,8 @@
-Catapult API in Go [![GoDoc](https://godoc.org/bandwidthcom/go-bandwidth/slack?status.svg)](https://godoc.org/github.com/nlopes/slack) [![Build Status](https://travis-ci.org/bandwidthcom/go-bandwidth.svg)](https://travis-ci.org/bandwidthcom/go-bandwidth)
+Catapult API in Go [![GoDoc](https://godoc.org/bandwidthcom/go-bandwidth?status.svg)](https://godoc.org/github.com/bandwidthcom/go-bandwidth) [![Build Status](https://travis-ci.org/bandwidthcom/go-bandwidth.svg)](https://travis-ci.org/bandwidthcom/go-bandwidth)
 ===============
 
 
-Bandwidth [Bandwidth's App Platform](http://ap.bandwidth.com/?utm_medium=social&utm_source=github&utm_campaign=dtolb&utm_content=) Ruby SDK
+Bandwidth [Bandwidth's App Platform](http://ap.bandwidth.com/?utm_medium=social&utm_source=github&utm_campaign=dtolb&utm_content=) Go SDK
 
 With go-bandwidth  you have access to the entire set of API methods including:
 * **Account** - get user's account data and transactions,
@@ -21,7 +21,7 @@ With go-bandwidth  you have access to the entire set of API methods including:
 * **PhoneNumber** - get access to user's phone numbers,
 * **Recording** - mamange user's recordings.
 
-Also you can work with Bandwidth XML using special types (in namespace `Bandwidth::Xml`). 
+Also you can work with Bandwidth XML using special types. 
 ## Install
 
 ```

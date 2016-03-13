@@ -49,7 +49,7 @@ func (c *Client) prepareURL(path string) string{
 	if path[0] != '/' {
 		path = "/" + path
 	}
-	return fmt.Sprintf("/%s/%s%s", c.APIEndPoint, c.APIVersion, path)
+	return fmt.Sprintf("%s/%s%s", c.APIEndPoint, c.APIVersion, path)
 }
 
 func (c* Client) createRequest(method, path string) (*http.Request, error){
