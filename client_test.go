@@ -25,6 +25,32 @@ func shouldFail(t *testing.T, action func() (interface{}, error)) error {
 	return err
 }
 
+func getAPI() *Client {
+	api, _ := New("userId", "apiToken", "apiSecret")
+	return api
+}
+
+func createFakeResponse(body string, statusCode int) *http.Response {
+	return &http.Response{StatusCode: statusCode,
+		Body: nopCloser{bytes.NewReader([]byte(body))}}
+}
+
+func startFakeServer(handler func(w http.ResponseWriter, r *http.Request)) (*httptest.Server, *Client) {
+	api := getAPI()
+	fakeServer := httptest.NewServer(http.HandlerFunc(handler))
+	api.APIEndPoint = fakeServer.URL
+	return fakeServer, api
+}
+
+func readText(t *testing.T, r io.Reader) string {
+	text, err := ioutil.ReadAll(r)
+	if err != nil {
+		t.Error("Error on reading content")
+		return ""
+	}
+	return string(text)
+}
+
 func TestNew(t *testing.T) {
 	api, _ := New("userId", "apiToken", "apiSecret")
 	expect(t, api.UserID, "userId")
@@ -58,31 +84,6 @@ func TestNewFail(t *testing.T) {
 	shouldFail(t, func() (interface{}, error) { return New("userID", "apiToken", "") })
 }
 
-func getAPI() *Client {
-	api, _ := New("userId", "apiToken", "apiSecret")
-	return api
-}
-
-func createFakeResponse(body string, statusCode int) *http.Response {
-	return &http.Response{StatusCode: statusCode,
-		Body: nopCloser{bytes.NewReader([]byte(body))}}
-}
-
-func startFakeServer(handler func(w http.ResponseWriter, r *http.Request)) (*httptest.Server, *Client) {
-	api := getAPI()
-	fakeServer := httptest.NewServer(http.HandlerFunc(handler))
-	api.APIEndPoint = fakeServer.URL
-	return fakeServer, api
-}
-
-func readText(t *testing.T, r io.Reader) string {
-	text, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Error("Error on reading content")
-		return ""
-	}
-	return string(text)
-}
 
 func TestConcatUserPath(t *testing.T) {
 	api := getAPI()
@@ -117,10 +118,6 @@ func TestCreateRequest(t *testing.T) {
 	expect(t, req.Header.Get("Authorization"), "Basic YXBpVG9rZW46YXBpU2VjcmV0")
 }
 
-func TestCreateRequestFail(t *testing.T) {
-	api := getAPI()
-	shouldFail(t, func() (interface{}, error) { return api.createRequest("\r\nINVALID\nMETHOD", "/test") })
-}
 
 func TestCheckResponse(t *testing.T) {
 	api := getAPI()
@@ -182,9 +179,4 @@ func TestMakeRequestWithBody(t *testing.T) {
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
-}
-
-func TestMakeRequestFail(t *testing.T) {
-	api := getAPI()
-	shouldFail(t, func() (interface{}, error) { return api.makeRequest("INVALID\nMETHOD\n", "/test") })
 }
