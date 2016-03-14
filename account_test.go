@@ -2,7 +2,6 @@ package bandwidth
 
 import (
 	"net/http"
-	//"fmt"
 	"testing"
 )
 

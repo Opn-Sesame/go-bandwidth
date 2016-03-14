@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // Client is main API object
@@ -61,22 +62,22 @@ func (c *Client) createRequest(method, path string) (*http.Request, error) {
 	return request, nil
 }
 
-func (c *Client) checkResponse(response *http.Response, defaultResponseBody interface{}) (interface{}, error) {
+func (c *Client) checkResponse(response *http.Response, defaultResponseBody interface{}) (interface{}, http.Header, error) {
 	defer response.Body.Close()
 	var body interface{}
 	rawJSON, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if len(rawJSON) > 0 {
 		err = json.Unmarshal([]byte(rawJSON), &body)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	if response.StatusCode >= 200 && response.StatusCode < 400 {
 		if body == nil {
-			return defaultResponseBody, nil
+			return defaultResponseBody, response.Header, nil
 		}
 		result := body
 		switch body.(type) {
@@ -89,7 +90,7 @@ func (c *Client) checkResponse(response *http.Response, defaultResponseBody inte
 				}
 				result = list
 		}
-		return result, nil
+		return result, response.Header, nil
 	}
 	errorBody := make(map[string]interface{})
 	if body != nil {
@@ -100,34 +101,36 @@ func (c *Client) checkResponse(response *http.Response, defaultResponseBody inte
 		message = errorBody["code"]
 	}
 	if message == nil {
-		return nil, fmt.Errorf("Http code %d", response.StatusCode)
+		return nil, nil, fmt.Errorf("Http code %d", response.StatusCode)
 	}
-	return nil, errors.New(message.(string))
+	return nil, nil, errors.New(message.(string))
 }
 
-func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, error) {
+func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
 	request, err := c.createRequest(method, path)
 	var defaultResponseBody interface{}
 	defaultResponseBody = nil
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if len(data) > 0 {
-		if data[0] == nil {
-			data[0] = map[string]interface{}{}
-		}
 		if method == "GET" {
-			item := data[0].(map[string]interface{})
+			var item map[string]string
+			if data[0] == nil {
+				item = make(map[string]string)
+			} else {
+				item = data[0].(map[string]string)
+			}
 			query := make(url.Values)
 			for key, value := range item {
-				query[key] = []string{value.(string)}
+				query[key] = []string{value}
 			}
 			request.URL.RawQuery = query.Encode()
 		} else {
 			request.Header.Set("Content-Type", "application/json")
 			rawJSON, err := json.Marshal(data[0])
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			request.Body = nopCloser{bytes.NewReader(rawJSON)}
 		}
@@ -138,9 +141,18 @@ func (c *Client) makeRequest(method, path string, data ...interface{}) (interfac
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return c.checkResponse(response, defaultResponseBody)
+}
+
+func getIDFromLocationHeader(headers http.Header) string{
+	list := strings.Split(headers.Get("Location"), "/")
+	l := len(list)
+	if l > 0 {
+		return list[l - 1]
+	}
+	return ""
 }
 
 type nopCloser struct {

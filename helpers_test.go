@@ -65,7 +65,6 @@ func startMockServer(t *testing.T, handlers []RequestHandler) (*httptest.Server,
 				handler.StatusCodeToSend = http.StatusOK
 			}
 			if handler.Method == r.Method && handler.PathAndQuery == r.URL.String() {
-				w.WriteHeader(handler.StatusCodeToSend)
 				if handler.EstimatedContent != "" {
 					expect(t, readText(t, r.Body), handler.EstimatedContent)
 				}
@@ -74,15 +73,16 @@ func startMockServer(t *testing.T, handlers []RequestHandler) (*httptest.Server,
 						expect(t, r.Header.Get(key), value)
 					}
 				}
+				header := w.Header()
 				if handler.HeadersToSend != nil {
-					header := w.Header()
 					for key, value := range handler.HeadersToSend {
 						header.Set(key, value)
 					}
-					if handler.ContentToSend != "" && header.Get("Content-Type") == "" {
-						header.Set("Content-Type", "application/json")
-					}
 				}
+				if handler.ContentToSend != "" && header.Get("Content-Type") == "" {
+					header.Set("Content-Type", "application/json")
+				}
+				w.WriteHeader(handler.StatusCodeToSend)
 				if handler.ContentToSend != "" {
 					fmt.Fprintln(w, handler.ContentToSend)
 				}
