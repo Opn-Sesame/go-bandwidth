@@ -89,7 +89,7 @@ func TestGetAndOrderAvailableNumbersFail(t *testing.T) {
 		Method:       http.MethodPost,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	shouldFail(t, func()(interface{}, error){ return api.GetAvailableNumbers(AvailableNumberTypeTollFree, map[string]string{
+	shouldFail(t, func()(interface{}, error){ return api.GetAndOrderAvailableNumbers(AvailableNumberTypeTollFree, map[string]string{
 		"state": "NC",
 		"city": "Cary"})})
 }

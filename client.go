@@ -153,10 +153,7 @@ func getIDFromLocationHeader(headers http.Header) string{
 func getIDFromLocation(location string) string{
 	list := strings.Split(location, "/")
 	l := len(list)
-	if l > 0 {
-		return list[l - 1]
-	}
-	return ""
+	return list[l - 1]
 }
 
 type nopCloser struct {

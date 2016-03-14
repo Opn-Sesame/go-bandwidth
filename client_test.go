@@ -72,6 +72,11 @@ func TestCreateRequest(t *testing.T) {
 	expect(t, req.Header.Get("Authorization"), "Basic YXBpVG9rZW46YXBpU2VjcmV0")
 }
 
+func TestCreateRequestFail(t *testing.T) {
+	api := getAPI()
+	shouldFail(t, func()(interface{}, error){ return api.createRequest("invalid\n\r\tmethod", "invalid:/\n/ url = ") })
+}
+
 func TestCheckResponse(t *testing.T) {
 	api := getAPI()
 	data, _, _ := api.checkResponse(createFakeResponse(`{"test": "test"}`, 200), nil)
@@ -100,6 +105,9 @@ func TestCheckResponseFail(t *testing.T) {
 		return api.checkResponse(createFakeResponse("", 400), nil)
 	})
 	expect(t, err.Error(), "Http code 400")
+	fail(func() (interface{}, http.Header, error) {
+		return api.checkResponse(createFakeResponse("invalid\njson", 400), nil)
+	})
 }
 
 func TestMakeRequest(t *testing.T) {
@@ -109,6 +117,14 @@ func TestMakeRequest(t *testing.T) {
 	defer server.Close()
 	result, _, _ := api.makeRequest(http.MethodGet, "/test")
 	expect(t, result.(map[string]interface{})["test"], "test")
+}
+
+func TestMakeRequestFail(t *testing.T) {
+	api := getAPI()
+	shouldFail(t, func()(interface{}, error){
+		_, _, err := api.makeRequest("invalid\n\r\tmethod", "invalid:/\n/ url = ")
+		return nil, err
+	})
 }
 
 func TestMakeRequestWithArrayAsResponse(t *testing.T) {
@@ -167,4 +183,9 @@ func TestGetIDFromLocationHeader(t *testing.T) {
 	expect(t, getIDFromLocationHeader(headers), "")
 	headers = http.Header {}
 	expect(t, getIDFromLocationHeader(headers), "")
+}
+
+func TestGetIDFromLocation(t *testing.T) {
+	expect(t, getIDFromLocation("http://localhost/123"), "123")
+	expect(t, getIDFromLocation(""), "")
 }
