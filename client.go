@@ -61,7 +61,7 @@ func (c *Client) createRequest(method, path string) (*http.Request, error) {
 	return request, nil
 }
 
-func (c *Client) checkResponse(response *http.Response) (interface{}, error) {
+func (c *Client) checkResponse(response *http.Response, defaultResponseBody interface{}) (interface{}, error) {
 	defer response.Body.Close()
 	var body interface{}
 	rawJSON, err := ioutil.ReadAll(response.Body)
@@ -75,7 +75,21 @@ func (c *Client) checkResponse(response *http.Response) (interface{}, error) {
 		}
 	}
 	if response.StatusCode >= 200 && response.StatusCode < 400 {
-		return body, nil
+		if body == nil {
+			return defaultResponseBody, nil
+		}
+		result := body
+		switch body.(type) {
+			case []interface{}:
+				source := body.([]interface{})
+				l := len(source)
+				list := make([]map[string]interface{}, l)
+				for i := 0; i < l; i++ {
+					list[i] = source[i].(map[string]interface{})
+				}
+				result = list
+		}
+		return result, nil
 	}
 	errorBody := make(map[string]interface{})
 	if body != nil {
@@ -93,10 +107,15 @@ func (c *Client) checkResponse(response *http.Response) (interface{}, error) {
 
 func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, error) {
 	request, err := c.createRequest(method, path)
+	var defaultResponseBody interface{}
+	defaultResponseBody = nil
 	if err != nil {
 		return nil, err
 	}
 	if len(data) > 0 {
+		if data[0] == nil {
+			data[0] = map[string]interface{}{}
+		}
 		if method == "GET" {
 			item := data[0].(map[string]interface{})
 			query := make(url.Values)
@@ -113,12 +132,15 @@ func (c *Client) makeRequest(method, path string, data ...interface{}) (interfac
 			request.Body = nopCloser{bytes.NewReader(rawJSON)}
 		}
 	}
+	if len(data) > 1 {
+		defaultResponseBody = data[1]
+	}
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
-	return c.checkResponse(response)
+	return c.checkResponse(response, defaultResponseBody)
 }
 
 type nopCloser struct {

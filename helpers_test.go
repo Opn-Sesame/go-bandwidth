@@ -13,7 +13,13 @@ import (
 
 func expect(t *testing.T, value interface{}, expected interface{}) {
 	if !reflect.DeepEqual(value, expected) {
-		t.Errorf("Expected %v  - Got %v", expected, value)
+		t.Errorf("Expected %v  - Got %v (%T)", expected, value, value)
+	}
+}
+
+func expectNil(t *testing.T, value interface{}) {
+	if value != nil {
+		t.Errorf("Expected nil  - Got %v", value)
 	}
 }
 

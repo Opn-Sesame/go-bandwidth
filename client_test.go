@@ -74,7 +74,7 @@ func TestCreateRequest(t *testing.T) {
 
 func TestCheckResponse(t *testing.T) {
 	api := getAPI()
-	data, _ := api.checkResponse(createFakeResponse(`{"test": "test"}`, 200))
+	data, _ := api.checkResponse(createFakeResponse(`{"test": "test"}`, 200), nil)
 	result := data.(map[string]interface{})
 	expect(t, result["test"].(string), "test")
 }
@@ -82,12 +82,12 @@ func TestCheckResponse(t *testing.T) {
 func TestCheckResponseFail(t *testing.T) {
 	api := getAPI()
 	err := shouldFail(t, func() (interface{}, error) {
-		return api.checkResponse(createFakeResponse(`{"code": "400", "message": "some error"}`, 400))
+		return api.checkResponse(createFakeResponse(`{"code": "400", "message": "some error"}`, 400), nil)
 	})
 	expect(t, err.Error(), "some error")
-	err = shouldFail(t, func() (interface{}, error) { return api.checkResponse(createFakeResponse(`{"code": "400"}`, 400)) })
+	err = shouldFail(t, func() (interface{}, error) { return api.checkResponse(createFakeResponse(`{"code": "400"}`, 400), nil) })
 	expect(t, err.Error(), "400")
-	err = shouldFail(t, func() (interface{}, error) { return api.checkResponse(createFakeResponse("", 400)) })
+	err = shouldFail(t, func() (interface{}, error) { return api.checkResponse(createFakeResponse("", 400), nil) })
 	expect(t, err.Error(), "Http code 400")
 }
 
@@ -98,6 +98,17 @@ func TestMakeRequest(t *testing.T) {
 	defer server.Close()
 	result, _ := api.makeRequest(http.MethodGet, "/test")
 	expect(t, result.(map[string]interface{})["test"], "test")
+}
+
+func TestMakeRequestWithArrayAsResponse(t *testing.T) {
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:  "/v1/test",
+		ContentToSend: `[{"test": "test"}]`}})
+	defer server.Close()
+	result, _ := api.makeRequest(http.MethodGet, "/test")
+	list := result.([]map[string]interface{})
+	expect(t, len(list), 1)
+	expect(t, list[0]["test"], "test")
 }
 
 func TestMakeRequestWithQuery(t *testing.T) {
@@ -122,5 +133,19 @@ func TestMakeRequestWithBody(t *testing.T) {
 	result, _ := api.makeRequest(http.MethodPost, "/test", map[string]interface{}{
 		"field1": "value1",
 		"field2": "value with space"})
+	expect(t, result.(map[string]interface{})["test"], "test")
+}
+
+func TestMakeRequestWithEmptyResponse(t *testing.T) {
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:     "/v1/test",
+		Method:           http.MethodGet,
+		ContentToSend:    ""}})
+	defer server.Close()
+	result, _ := api.makeRequest(http.MethodGet, "/test")
+	expectNil(t, result)
+	result, _ = api.makeRequest(http.MethodGet, "/test", nil, "default")
+	expect(t, result, "default")
+	result, _ = api.makeRequest(http.MethodGet, "/test", map[string]interface{}{}, map[string]interface{}{"test": "test"})
 	expect(t, result.(map[string]interface{})["test"], "test")
 }
