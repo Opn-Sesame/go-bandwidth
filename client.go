@@ -147,7 +147,11 @@ func (c *Client) makeRequest(method, path string, data ...interface{}) (interfac
 }
 
 func getIDFromLocationHeader(headers http.Header) string{
-	list := strings.Split(headers.Get("Location"), "/")
+	return getIDFromLocation(headers.Get("Location"))
+}
+
+func getIDFromLocation(location string) string{
+	list := strings.Split(location, "/")
 	l := len(list)
 	if l > 0 {
 		return list[l - 1]

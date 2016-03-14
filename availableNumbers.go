@@ -40,6 +40,13 @@ func (api *Client) GetAndOrderAvailableNumbers(numberType AvailableNumberType, q
 	if err != nil {
 		return nil, err
 	}
-	return result.([]map[string] interface{}), nil
+	list := result.([]map[string] interface{})
+	for _, item := range list {
+		location := item["location"]
+		if location != nil {
+			item["id"] = getIDFromLocation(location.(string))
+		}
+	}
+	return list, nil
 }
 

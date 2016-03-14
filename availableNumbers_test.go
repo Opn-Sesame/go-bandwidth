@@ -79,6 +79,8 @@ func TestGetAndOrderAvailableNumbers(t *testing.T) {
 		return
 	}
 	expect(t, len(result), 2)
+	expect(t, result[0]["id"], "{numberId1}")
+	expect(t, result[1]["id"], "{numberId2}")
 }
 
 func TestGetAndOrderAvailableNumbersFail(t *testing.T) {
