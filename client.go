@@ -58,7 +58,7 @@ func (c *Client) createRequest(method, path string) (*http.Request, error) {
 	}
 	request.SetBasicAuth(c.APIToken, c.APISecret)
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("User-Agent", fmt.Sprintf("go-bandwidth-v%s", Version))
+	request.Header.Set("User-Agent", fmt.Sprintf("go-bandwidth/v%s", Version))
 	return request, nil
 }
 
