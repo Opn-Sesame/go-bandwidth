@@ -87,7 +87,7 @@ func TestSetCallRecodingEnabled(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/calls/123",
 		Method:           http.MethodPost,
-		EstimatedContent: `{"recordingEnabled":true}`}})
+		EstimatedContent: `{"recordingEnabled":"true"}`}})
 	defer server.Close()
 	err := api.SetCallRecodingEnabled("123", true)
 	if err != nil {

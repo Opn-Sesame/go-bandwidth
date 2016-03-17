@@ -1,5 +1,9 @@
 package bandwidth
 
+import (
+	"strconv"
+)
+
 func mergeMaps(src, dst map[string]interface{}){
 	if dst == nil {
 		dst = map[string]interface{}{}
@@ -37,7 +41,7 @@ func (api *Client) HangUpCall(id string) error{
 
 // SetCallRecodingEnabled  hangs up the call
 func (api *Client) SetCallRecodingEnabled(id string, enabled bool) error{
-	return api.UpdateCall(id,  map[string]interface{}{"recordingEnabled": enabled})
+	return api.UpdateCall(id,  map[string]interface{}{"recordingEnabled": strconv.FormatBool(enabled)})
 }
 
 // TransferCallTo  transfers call to another number
