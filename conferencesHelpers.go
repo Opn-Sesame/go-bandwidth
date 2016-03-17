@@ -12,8 +12,8 @@ func (api *Client) MuteConference(id string, mute bool) error{
 	return api.UpdateConference(id, map[string]interface{}{"mute": strconv.FormatBool(mute)})
 }
 
-// RemoveConferenceMember removes the member from the conference
-func (api *Client) RemoveConferenceMember(id string, memberID string) error{
+// DeleteConferenceMember removes the member from the conference
+func (api *Client) DeleteConferenceMember(id string, memberID string) error{
 	return api.UpdateConferenceMember(id, memberID, map[string]interface{}{"state": "completed"})
 }
 

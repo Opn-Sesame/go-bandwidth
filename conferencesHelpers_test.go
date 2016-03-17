@@ -29,15 +29,15 @@ func TestMuteConference(t *testing.T) {
 	}
 }
 
-func TestRemoveConferenceMember(t *testing.T) {
+func TestDeleteConferenceMember(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/conferences/123/members/456",
 		Method:           http.MethodPost,
 		EstimatedContent: `{"state":"completed"}`}})
 	defer server.Close()
-	err := api.RemoveConferenceMember("123", "456")
+	err := api.DeleteConferenceMember("123", "456")
 	if err != nil {
-		t.Error("Failed conference of RemoveConferenceMember()")
+		t.Error("Failed conference of DeleteConferenceMember()")
 	}
 }
 
