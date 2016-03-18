@@ -19,7 +19,7 @@ func TestGetMessages(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetMessages()
 	if err != nil {
-		t.Error("Failed message of GetMessages()")
+		t.Error("Failed call of GetMessages()")
 		return
 	}
 	expect(t, len(result), 2)
@@ -43,7 +43,7 @@ func TestCreateMessage(t *testing.T) {
 	defer server.Close()
 	id, err := api.CreateMessage(map[string]interface{}{"from": "fromNumber", "to": "toNumber", "text": "text"})
 	if err != nil {
-		t.Error("Failed message of CreateMessage()")
+		t.Error("Failed call of CreateMessage()")
 		return
 	}
 	expect(t, id, "123")
@@ -71,7 +71,7 @@ func TestGetMessage(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetMessage("123")
 	if err != nil {
-		t.Error("Failed message of GetMessage()")
+		t.Error("Failed call of GetMessage()")
 		return
 	}
 	expect(t, result["id"], "{messageId1}")

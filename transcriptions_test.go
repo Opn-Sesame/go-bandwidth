@@ -19,7 +19,7 @@ func TestGetRecordingTranscriptions(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetRecordingTranscriptions("123")
 	if err != nil {
-		t.Error("Failed transcription of GetRecordingTranscriptions()")
+		t.Error("Failed call of GetRecordingTranscriptions()")
 		return
 	}
 	expect(t, len(result), 2)
@@ -42,13 +42,13 @@ func TestCreateRecordingTranscription(t *testing.T) {
 	defer server.Close()
 	id, err := api.CreateRecordingTranscription("123")
 	if err != nil {
-		t.Error("Failed transcription of CreateRecordingTranscription()")
+		t.Error("Failed call of CreateRecordingTranscription()")
 		return
 	}
 	expect(t, id, "456")
 	id, err = api.CreateRecordingTranscription("123", map[string]interface{}{})
 	if err != nil {
-		t.Error("Failed transcription of CreateRecordingTranscription()")
+		t.Error("Failed call of CreateRecordingTranscription()")
 		return
 	}
 	expect(t, id, "456")
@@ -77,7 +77,7 @@ func TestGetRecordingTranscription(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetRecordingTranscription("123", "456")
 	if err != nil {
-		t.Error("Failed transcription of GetRecordingTranscription()")
+		t.Error("Failed call of GetRecordingTranscription()")
 		return
 	}
 	expect(t, result["text"], "transcription2")

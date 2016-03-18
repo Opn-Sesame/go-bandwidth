@@ -19,7 +19,7 @@ func TestGetDomains(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetDomains()
 	if err != nil {
-		t.Error("Failed domain of GetDomains()")
+		t.Error("Failed call of GetDomains()")
 		return
 	}
 	expect(t, len(result), 2)
@@ -43,7 +43,7 @@ func TestCreateDomain(t *testing.T) {
 	defer server.Close()
 	id, err := api.CreateDomain(map[string]interface{}{"name": "domain"})
 	if err != nil {
-		t.Error("Failed domain of CreateDomain()")
+		t.Error("Failed call of CreateDomain()")
 		return
 	}
 	expect(t, id, "123")
@@ -67,7 +67,7 @@ func TestDeleteDomain(t *testing.T) {
 	defer server.Close()
 	err := api.DeleteDomain("123")
 	if err != nil {
-		t.Error("Failed domain of DeleteDomain()")
+		t.Error("Failed call of DeleteDomain()")
 		return
 	}
 }

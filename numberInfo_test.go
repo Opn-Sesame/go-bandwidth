@@ -18,7 +18,7 @@ func TestGetNumberInfo(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetNumberInfo("123")
 	if err != nil {
-		t.Error("Failed message of GetNumberInfo()")
+		t.Error("Failed call of GetNumberInfo()")
 		return
 	}
 	expect(t, result["number"], "123")

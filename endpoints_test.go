@@ -19,7 +19,7 @@ func TestGetDomainEndpoints(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetDomainEndpoints("123")
 	if err != nil {
-		t.Error("Failed endpoint of GetDomainEndpoints()")
+		t.Error("Failed call of GetDomainEndpoints()")
 		return
 	}
 	expect(t, len(result), 2)
@@ -43,7 +43,7 @@ func TestCreateDomainEndpoint(t *testing.T) {
 	defer server.Close()
 	id, err := api.CreateDomainEndpoint("123", map[string]interface{}{"name": "endpoint"})
 	if err != nil {
-		t.Error("Failed endpoint of CreateDomainEndpoint()")
+		t.Error("Failed call of CreateDomainEndpoint()")
 		return
 	}
 	expect(t, id, "456")
@@ -68,7 +68,7 @@ func TestUpdateDomainEndpoint(t *testing.T) {
 	defer server.Close()
 	err := api.UpdateDomainEndpoint("123", "456", map[string]interface{}{"name": "endpoint1"})
 	if err != nil {
-		t.Error("Failed endpoint of UpdateDomainEndpoint()")
+		t.Error("Failed call of UpdateDomainEndpoint()")
 		return
 	}
 }
@@ -81,7 +81,7 @@ func TestDeleteDomainEndpoint(t *testing.T) {
 	defer server.Close()
 	err := api.DeleteDomainEndpoint("123", "456")
 	if err != nil {
-		t.Error("Failed endpoint of DeleteDomainEndpoint()")
+		t.Error("Failed call of DeleteDomainEndpoint()")
 		return
 	}
 }
@@ -97,7 +97,7 @@ func TestGetDomainEndpoint(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetDomainEndpoint("123", "456")
 	if err != nil {
-		t.Error("Failed endpoint of GetDomainEndpoint()")
+		t.Error("Failed call of GetDomainEndpoint()")
 		return
 	}
 	expect(t, result["name"], "endpoint2")

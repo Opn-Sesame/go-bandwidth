@@ -19,7 +19,7 @@ func TestGetPhoneNumbers(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetPhoneNumbers()
 	if err != nil {
-		t.Error("Failed phoneNumber of GetPhoneNumbers()")
+		t.Error("Failed call of GetPhoneNumbers()")
 		return
 	}
 	expect(t, len(result), 2)
@@ -43,7 +43,7 @@ func TestCreatePhoneNumber(t *testing.T) {
 	defer server.Close()
 	id, err := api.CreatePhoneNumber(map[string]interface{}{"number": "phoneNumber"})
 	if err != nil {
-		t.Error("Failed phoneNumber of CreatePhoneNumber()")
+		t.Error("Failed call of CreatePhoneNumber()")
 		return
 	}
 	expect(t, id, "123")
@@ -71,7 +71,7 @@ func TestGetPhoneNumber(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetPhoneNumber("123")
 	if err != nil {
-		t.Error("Failed phoneNumber of GetPhoneNumber()")
+		t.Error("Failed call of GetPhoneNumber()")
 		return
 	}
 	expect(t, len(result), 2)
@@ -95,7 +95,7 @@ func TestUpdatePhoneNumber(t *testing.T) {
 	defer server.Close()
 	err := api.UpdatePhoneNumber("123", map[string]interface{}{"applicationId": "appId"})
 	if err != nil {
-		t.Error("Failed phoneNumber of UpdatePhoneNumber()")
+		t.Error("Failed call of UpdatePhoneNumber()")
 		return
 	}
 }
@@ -108,7 +108,7 @@ func TestDeletePhoneNumber(t *testing.T) {
 	defer server.Close()
 	err := api.DeletePhoneNumber("123")
 	if err != nil {
-		t.Error("Failed phoneNumber of DeletePhoneNumber()")
+		t.Error("Failed call of DeletePhoneNumber()")
 		return
 	}
 }

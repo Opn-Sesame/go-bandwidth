@@ -15,7 +15,7 @@ func TestCreateConference(t *testing.T) {
 	id, err := api.CreateConference(map[string]interface{}{
 		"from": "fromNumber"})
 	if err != nil {
-		t.Error("Failed conference of CreateConference()")
+		t.Error("Failed call of CreateConference()")
 		return
 	}
 	expect(t, id, "123")
@@ -44,7 +44,7 @@ func TestGetConference(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetConference("123")
 	if err != nil {
-		t.Error("Failed conference of GetConference()")
+		t.Error("Failed call of GetConference()")
 		return
 	}
 	expect(t, result["id"], "{conferenceId}")
@@ -67,7 +67,7 @@ func TestUpdateConference(t *testing.T) {
 	defer server.Close()
 	err := api.UpdateConference("123", map[string]interface{}{"state":"completed"})
 	if err != nil {
-		t.Error("Failed conference of UpdateConference()")
+		t.Error("Failed call of UpdateConference()")
 		return
 	}
 }
@@ -80,7 +80,7 @@ func TestPlayAudioToConference(t *testing.T) {
 	defer server.Close()
 	err := api.PlayAudioToConference("123", map[string]interface{}{"fileUrl": "file.mp3"})
 	if err != nil {
-		t.Error("Failed conference of PlayAudioToConference()")
+		t.Error("Failed call of PlayAudioToConference()")
 		return
 	}
 }
@@ -100,7 +100,7 @@ func TestGetConferenceMembers(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetConferenceMembers("123")
 	if err != nil {
-		t.Error("Failed conference of GetConferenceMembers()")
+		t.Error("Failed call of GetConferenceMembers()")
 		return
 	}
 	expect(t, len(result), 2)
@@ -125,7 +125,7 @@ func TestGetConferenceMember(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetConferenceMember("123", "456")
 	if err != nil {
-		t.Error("Failed conference of GetConferenceMember()")
+		t.Error("Failed call of GetConferenceMember()")
 		return
 	}
 	expect(t, result["id"], "{member1}")
@@ -149,7 +149,7 @@ func TestCreateConferenceMember(t *testing.T) {
 	defer server.Close()
 	id, err := api.CreateConferenceMember("123", map[string]interface{}{"callId": "callId"})
 	if err != nil {
-		t.Error("Failed conference of CreateConferenceMember()")
+		t.Error("Failed call of CreateConferenceMember()")
 		return
 	}
 	expect(t, id, "456")
@@ -175,7 +175,7 @@ func TestUpdateConferenceMember(t *testing.T) {
 	defer server.Close()
 	err := api.UpdateConferenceMember("123", "456",  map[string]interface{}{"mute": "true"})
 	if err != nil {
-		t.Error("Failed conference of UpdateConferenceMember()")
+		t.Error("Failed call of UpdateConferenceMember()")
 	}
 }
 
@@ -199,7 +199,7 @@ func TestPlayAudioToConferenceMember(t *testing.T) {
 	defer server.Close()
 	err := api.PlayAudioToConferenceMember("123", "456", map[string]interface{}{"fileUrl": "file.mp3"})
 	if err != nil {
-		t.Error("Failed conference of PlayAudioToConferenceMember()")
+		t.Error("Failed call of PlayAudioToConferenceMember()")
 		return
 	}
 }

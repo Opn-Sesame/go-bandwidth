@@ -14,7 +14,7 @@ func TestSendMessageTo(t *testing.T) {
 	defer server.Close()
 	id, err := api.SendMessageTo("fromNumber", "toNumber", "text")
 	if err != nil {
-		t.Error("Failed message of SendMessageTo()")
+		t.Error("Failed call of SendMessageTo()")
 		return
 	}
 	expect(t, id, "123")
@@ -29,7 +29,7 @@ func TestSendMessageToWithOptions(t *testing.T) {
 	defer server.Close()
 	id, err := api.SendMessageTo("fromNumber", "toNumber", "text", map[string]interface{}{"callbackUrl": "url"})
 	if err != nil {
-		t.Error("Failed message of SendMessageTo()")
+		t.Error("Failed call of SendMessageTo()")
 		return
 	}
 	expect(t, id, "123")

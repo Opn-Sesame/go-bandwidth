@@ -19,7 +19,7 @@ func TestGetRecordings(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetRecordings()
 	if err != nil {
-		t.Error("Failed recording of GetRecordings()")
+		t.Error("Failed call of GetRecordings()")
 		return
 	}
 	expect(t, len(result), 2)
@@ -45,7 +45,7 @@ func TestGetRecording(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetRecording("123")
 	if err != nil {
-		t.Error("Failed recording of GetRecording()")
+		t.Error("Failed call of GetRecording()")
 		return
 	}
 	expect(t, result["media"], "recording1")
