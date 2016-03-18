@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"io/ioutil"
 )
 
 const mediaPath = "media"
@@ -52,4 +53,22 @@ func (api *Client) UploadMediaFile(name string, file interface{}, contentType ..
 	}
 	_, _, err = api.checkResponse(response, nil)
 	return err
+}
+
+// DownloadMediaFile creates a new media
+func (api *Client) DownloadMediaFile(name string) (io.ReadCloser, string, error) {
+	request, err := api.createRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(mediaPath), url.QueryEscape(name)))
+	if err != nil {
+		return nil, "", err
+	}
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return nil, "", err
+	}
+	if(response.StatusCode >= 400){
+		text, _ := ioutil.ReadAll(response.Body)
+		return nil, "", fmt.Errorf("Http code %d: %s", response.StatusCode, text)
+	}
+	return response.Body, response.Header.Get("Content-Type"), nil
 }
