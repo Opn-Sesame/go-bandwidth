@@ -68,7 +68,7 @@ func TestCreateRequest(t *testing.T) {
 	expect(t, req.URL.String(), "https://api.catapult.inetwork.com/v1/test")
 	expect(t, req.Method, http.MethodGet)
 	expect(t, req.Header.Get("Accept"), "application/json")
-	expect(t, req.Header.Get("User-Agent"), fmt.Sprintf("go-bandwidth-v%s", Version))
+	expect(t, req.Header.Get("User-Agent"), fmt.Sprintf("go-bandwidth/v%s", Version))
 	expect(t, req.Header.Get("Authorization"), "Basic YXBpVG9rZW46YXBpU2VjcmV0")
 }
 
