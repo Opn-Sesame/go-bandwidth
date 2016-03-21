@@ -25,8 +25,13 @@ type Call struct {
 }
 
 // GetCalls returns list of previous calls that were made or received
-func (api *Client) GetCalls() ([]*Call, error) {
-	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(callsPath), &[]*Call{})
+// It returns list of Call instances or error
+func (api *Client) GetCalls(query ...map[string]string) ([]*Call, error) {
+	var options map[string]string
+	if len(query) > 0 {
+		options = query[0]
+	}
+	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(callsPath), &[]*Call{}, options)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +39,7 @@ func (api *Client) GetCalls() ([]*Call, error) {
 }
 
 // CreateCall creates an outbound phone call
+// It returns ID of created call
 func (api *Client) CreateCall(data map[string]interface{}) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, api.concatUserPath(callsPath), nil, data)
 	if err != nil {
@@ -43,6 +49,7 @@ func (api *Client) CreateCall(data map[string]interface{}) (string, error) {
 }
 
 // GetCall returns information about a call that was made or received
+// It return Call instance for found call or error
 func (api *Client) GetCall(id string) (*Call, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(callsPath), id), &Call{})
 	if err != nil {
@@ -52,18 +59,21 @@ func (api *Client) GetCall(id string) (*Call, error) {
 }
 
 // UpdateCall manage an active phone call. E.g. Answer an incoming call, reject an incoming call, turn on / off recording, transfer, hang up
+// It returns error object
 func (api *Client) UpdateCall(id string, data map[string]interface{}) error {
 	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(callsPath), id), nil, data)
 	return err
 }
 
 // PlayAudioToCall plays an audio or speak a sentence in a call
+// It returns error object
 func (api *Client) PlayAudioToCall(id string, data map[string]interface{}) error {
 	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "audio"), nil, data)
 	return err
 }
 
 // SendDTMFToCall plays an audio or speak a sentence in a call
+// It returns error object
 func (api *Client) SendDTMFToCall(id string, data map[string]interface{}) error {
 	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "dtmf"), nil, data)
 	return err
@@ -77,6 +87,7 @@ type CallEvent struct {
 }
 
 // GetCallEvents returns  the list of call events for a call
+// It returns list of CallEvent instances or error
 func (api *Client) GetCallEvents(id string) ([]*CallEvent, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "events"), &[]*CallEvent{})
 	if err != nil {
@@ -86,6 +97,7 @@ func (api *Client) GetCallEvents(id string) ([]*CallEvent, error) {
 }
 
 // GetCallEvent returns information about one call event
+// It returns CallEvent instance for found event or error
 func (api *Client) GetCallEvent(id string, eventID string) (*CallEvent, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(callsPath), id, "events", eventID), &CallEvent{})
 	if err != nil {
@@ -95,6 +107,7 @@ func (api *Client) GetCallEvent(id string, eventID string) (*CallEvent, error) {
 }
 
 // GetCallRecordings returns  all recordings related to the call
+// It return list of Recording instances or error
 func (api *Client) GetCallRecordings(id string) ([]*Recording, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "recordings"),  &[]*Recording{})
 	if err != nil {
@@ -104,6 +117,7 @@ func (api *Client) GetCallRecordings(id string) ([]*Recording, error) {
 }
 
 // GetCallTranscriptions returns  all transcriptions  related to the call
+// It return list of Transcription instances or error
 func (api *Client) GetCallTranscriptions(id string) ([]*Transcription, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "transcriptions"), &[]*Transcription{})
 	if err != nil {
@@ -113,6 +127,7 @@ func (api *Client) GetCallTranscriptions(id string) ([]*Transcription, error) {
 }
 
 // CreateGather gathers the DTMF digits pressed in a call
+// It returns ID of created gather or error
 func (api *Client) CreateGather(id string, data map[string]interface{}) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "gather"), nil, data)
 	if err != nil {
@@ -132,6 +147,7 @@ type Gather struct {
 }
 
 // GetGather returns the gather DTMF parameters and results of the call
+// It returns Gather instance or error
 func (api *Client) GetGather(id string, gatherID string) (*Gather, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(callsPath), id, "gather", gatherID), &Gather{})
 	if err != nil {
@@ -141,6 +157,7 @@ func (api *Client) GetGather(id string, gatherID string) (*Gather, error) {
 }
 
 // UpdateGather updates call's gather data
+// It returns error object
 func (api *Client) UpdateGather(id string, gatherID string, data map[string]interface{}) error {
 	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(callsPath), id, "gather", gatherID), nil, data)
 	return err

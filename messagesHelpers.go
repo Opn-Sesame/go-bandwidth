@@ -1,6 +1,7 @@
 package bandwidth
 
 // SendMessageTo sends a SMS/MMS to given number
+// It returns ID of created message or error
 func (api *Client) SendMessageTo(fromNumber string, toNumber string, text string, options ...map[string]interface{}) (string, error){
 	data := map[string]interface{}{
 		"from": fromNumber,

@@ -17,6 +17,7 @@ type NumberInfo struct {
 }
 
 // GetNumberInfo returns information fo given number
+// It returns NumberInfo instance or error
 func (api *Client) GetNumberInfo(number string) (*NumberInfo, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", numberInfoPath, url.QueryEscape(number)), &NumberInfo{})
 	if err != nil {

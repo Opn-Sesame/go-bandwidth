@@ -19,6 +19,7 @@ type MediaFile struct {
 }
 
 // GetMediaFiles returns  a list of your media files
+// It returns list of MediaFile instances or error
 func (api *Client) GetMediaFiles() ([]*MediaFile, error) {
 	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(mediaPath), &[]*MediaFile{})
 	if err != nil {
@@ -28,12 +29,14 @@ func (api *Client) GetMediaFiles() ([]*MediaFile, error) {
 }
 
 // DeleteMediaFile removes a media file
+// It returns error object
 func (api *Client) DeleteMediaFile(name string) error {
 	_, _, err := api.makeRequest(http.MethodDelete, fmt.Sprintf("%s/%s", api.concatUserPath(mediaPath), url.QueryEscape(name)))
 	return err
 }
 
-// UploadMediaFile creates a new media
+// UploadMediaFile creates a new media from file or any io.ReadCloser instance
+// It returns error object
 func (api *Client) UploadMediaFile(name string, file interface{}, contentType ...string) error {
 	request, err := api.createRequest(http.MethodPut, fmt.Sprintf("%s/%s", api.concatUserPath(mediaPath), url.QueryEscape(name)))
 	if err != nil {
@@ -62,7 +65,8 @@ func (api *Client) UploadMediaFile(name string, file interface{}, contentType ..
 	return err
 }
 
-// DownloadMediaFile creates a new media
+// DownloadMediaFile download media ffile
+// It returns error io.ReadCloser, cotent type of downloaded file or error
 func (api *Client) DownloadMediaFile(name string) (io.ReadCloser, string, error) {
 	request, err := api.createRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(mediaPath), url.QueryEscape(name)))
 	if err != nil {

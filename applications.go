@@ -17,6 +17,7 @@ type Application struct {
 }
 
 // GetApplications returns list of user's applications
+// It returns list of Application instances or error
 func (api *Client) GetApplications(query ...map[string]string) ([]*Application, error) {
 	var options map[string]string
 	if len(query) > 0 {
@@ -30,6 +31,7 @@ func (api *Client) GetApplications(query ...map[string]string) ([]*Application, 
 }
 
 // CreateApplication creates an application that can handle calls and messages for one of your phone number. Many phone numbers can share an application.
+// It returns ID of created application or error
 func (api *Client) CreateApplication(data map[string]interface{}) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, api.concatUserPath(applicationsPath), nil, data)
 	if err != nil {
@@ -39,6 +41,7 @@ func (api *Client) CreateApplication(data map[string]interface{}) (string, error
 }
 
 // GetApplication returns an user's application
+// It returns Application instance or error
 func (api *Client) GetApplication(id string) (*Application, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(applicationsPath), id), &Application{})
 	if err != nil {
@@ -48,12 +51,14 @@ func (api *Client) GetApplication(id string) (*Application, error) {
 }
 
 // UpdateApplication makes changes to an application
+// It returns error object
 func (api *Client) UpdateApplication(id string, data map[string]interface{}) error {
 	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(applicationsPath), id), nil, data)
 	return err
 }
 
 // DeleteApplication permanently deletes an application
+// It returns error object
 func (api *Client) DeleteApplication(id string) error {
 	_, _, err := api.makeRequest(http.MethodDelete, fmt.Sprintf("%s/%s", api.concatUserPath(applicationsPath), id))
 	return err

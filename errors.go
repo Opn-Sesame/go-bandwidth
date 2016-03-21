@@ -24,6 +24,7 @@ type ErrorDetail struct {
 }
 
 // GetErrors returns list of errors
+// It returns list of Error instances or error
 func (api *Client) GetErrors(query ...map[string]string) ([]*Error, error) {
 	var options map[string]string
 	if len(query) > 0 {
@@ -37,6 +38,7 @@ func (api *Client) GetErrors(query ...map[string]string) ([]*Error, error) {
 }
 
 // GetError returns  error by id
+// It return Error instance for found error or error object
 func (api *Client) GetError(id string) (*Error, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(errorsPath), id), &Error{})
 	if err != nil {

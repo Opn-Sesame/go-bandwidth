@@ -14,6 +14,7 @@ type Account struct {
 }
 
 // GetAccount returns account information (balance, etc)
+// It returns Account instance or error
 func (api *Client) GetAccount() (*Account, error) {
 	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(accountPath), &Account{})
 	if err != nil {
@@ -34,6 +35,7 @@ type AccountTransaction struct {
 }
 
 // GetAccountTransactions returns transactions from the user's account
+// It returns list of AccountTransaction instances or error
 func (api *Client) GetAccountTransactions() ([]*AccountTransaction, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(accountPath), "transactions"), &[]*AccountTransaction{})
 	if err != nil {

@@ -18,8 +18,13 @@ type Recording struct {
 }
 
 // GetRecordings returns  a list of the calls recordings
-func (api *Client) GetRecordings() ([]*Recording, error) {
-	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(recordingsPath), &[]*Recording{})
+// It returns list of Recording instances or error
+func (api *Client) GetRecordings(query ...map[string]string) ([]*Recording, error) {
+	var options map[string]string
+	if len(query) > 0 {
+		options = query[0]
+	}
+	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(recordingsPath), &[]*Recording{}, options)
 	if err != nil {
 		return nil, err
 	}
@@ -27,6 +32,7 @@ func (api *Client) GetRecordings() ([]*Recording, error) {
 }
 
 // GetRecording returns  a single call recording
+// It a Recording instance or error
 func (api *Client) GetRecording(id string) (*Recording, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(recordingsPath), id), &Recording{})
 	if err != nil {

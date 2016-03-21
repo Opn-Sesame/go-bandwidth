@@ -18,6 +18,7 @@ type Transcription struct {
 }
 
 // GetRecordingTranscriptions returns list of all transcriptions for a recording
+// It returns list of Transcription instances or error
 func (api *Client) GetRecordingTranscriptions(id string) ([]*Transcription, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(recordingsPath), id, transcriptionsPath), &[]*Transcription{})
 	if err != nil {
@@ -27,6 +28,7 @@ func (api *Client) GetRecordingTranscriptions(id string) ([]*Transcription, erro
 }
 
 // CreateRecordingTranscription creates a new transcription for a recording
+// It returns ID of created transcription or error
 func (api *Client) CreateRecordingTranscription(id string, data ...map[string]interface{}) (string, error) {
 	item := map[string]interface{}{}
 	if len(data) > 0 {
@@ -40,6 +42,7 @@ func (api *Client) CreateRecordingTranscription(id string, data ...map[string]in
 }
 
 // GetRecordingTranscription returns   single enpoint for a recording
+// It returns Transcription instance or error
 func (api *Client) GetRecordingTranscription(id string, transcriptionID string) (*Transcription, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(recordingsPath), id, transcriptionsPath, transcriptionID), &Transcription{})
 	if err != nil {

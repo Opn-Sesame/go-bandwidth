@@ -19,6 +19,7 @@ type DomainEndpoint struct {
 }
 
 // GetDomainEndpoints returns list of all endpoints for a domain
+// It returns list of DomainEndpoint instances or error
 func (api *Client) GetDomainEndpoints(id string) ([]*DomainEndpoint, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath), &[]*DomainEndpoint{})
 	if err != nil {
@@ -28,6 +29,7 @@ func (api *Client) GetDomainEndpoints(id string) ([]*DomainEndpoint, error) {
 }
 
 // CreateDomainEndpoint creates a new endpoint for a domain
+// It returns ID of created endpoint or error
 func (api *Client) CreateDomainEndpoint(id string, data map[string]interface{}) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath), nil, data)
 	if err != nil {
@@ -37,6 +39,7 @@ func (api *Client) CreateDomainEndpoint(id string, data map[string]interface{}) 
 }
 
 // GetDomainEndpoint returns   single enpoint for a domain
+// It returns DomainEndpoint instance or error
 func (api *Client) GetDomainEndpoint(id string, endpointID string) (*DomainEndpoint, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath, endpointID), &DomainEndpoint{})
 	if err != nil {
@@ -46,12 +49,14 @@ func (api *Client) GetDomainEndpoint(id string, endpointID string) (*DomainEndpo
 }
 
 // DeleteDomainEndpoint removes a endpoint from domain
+// It returns error object
 func (api *Client) DeleteDomainEndpoint(id string, endpointID string) error {
 	_, _, err := api.makeRequest(http.MethodDelete, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath, endpointID))
 	return err
 }
 
 // UpdateDomainEndpoint removes a endpoint from domain
+// It returns error object
 func (api *Client) UpdateDomainEndpoint(id string, endpointID string, data map[string]interface{}) error {
 	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath, endpointID), nil, data)
 	return err
