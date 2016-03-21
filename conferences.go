@@ -74,7 +74,7 @@ func (api *Client) CreateConferenceMember(id string, data map[string]interface{}
 
 // GetConferenceMembers returns  the list of conference members
 func (api *Client) GetConferenceMembers(id string) ([]*ConferenceMember, error) {
-	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(conferencesPath), id, "members"), nil, &[]*ConferenceMember{})
+	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(conferencesPath), id, "members"), &[]*ConferenceMember{})
 	if err != nil {
 		return nil, err
 	}

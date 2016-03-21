@@ -29,7 +29,7 @@ func (api *Client) GetBridges() ([]*Bridge, error) {
 
 // CreateBridge creates a bridge
 func (api *Client) CreateBridge(data map[string]interface{}) (string, error) {
-	_, headers, err := api.makeRequest(http.MethodPost, api.concatUserPath(bridgesPath), data)
+	_, headers, err := api.makeRequest(http.MethodPost, api.concatUserPath(bridgesPath), nil, data)
 	if err != nil {
 		return "", err
 	}
@@ -47,13 +47,13 @@ func (api *Client) GetBridge(id string) (*Bridge, error) {
 
 // UpdateBridge adds one or two calls in a bridge and also puts the bridge on hold/unhold
 func (api *Client) UpdateBridge(id string, data map[string]interface{}) error {
-	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(bridgesPath), id), data)
+	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(bridgesPath), id), nil, data)
 	return err
 }
 
 // PlayAudioToBridge plays an audio or speak a sentence in a bridge
 func (api *Client) PlayAudioToBridge(id string, data map[string]interface{}) error {
-	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(bridgesPath), id, "audio"), data)
+	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(bridgesPath), id, "audio"), nil, data)
 	return err
 }
 

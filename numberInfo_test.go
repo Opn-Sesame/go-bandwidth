@@ -21,7 +21,7 @@ func TestGetNumberInfo(t *testing.T) {
 		t.Error("Failed call of GetNumberInfo()")
 		return
 	}
-	expect(t, result["number"], "123")
+	expect(t, result.Number, "123")
 }
 
 func TestGetNumberInfoFail(t *testing.T) {

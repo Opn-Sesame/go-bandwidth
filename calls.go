@@ -78,7 +78,7 @@ type CallEvent struct {
 
 // GetCallEvents returns  the list of call events for a call
 func (api *Client) GetCallEvents(id string) ([]*CallEvent, error) {
-	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "events"), nil, &[]*CallEvent{})
+	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "events"), &[]*CallEvent{})
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (api *Client) GetCallEvent(id string, eventID string) (*CallEvent, error) {
 
 // GetCallRecordings returns  all recordings related to the call
 func (api *Client) GetCallRecordings(id string) ([]*Recording, error) {
-	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "recordings"), nil, &[]*Recording{})
+	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "recordings"),  &[]*Recording{})
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (api *Client) GetCallRecordings(id string) ([]*Recording, error) {
 
 // GetCallTranscriptions returns  all transcriptions  related to the call
 func (api *Client) GetCallTranscriptions(id string) ([]*Transcription, error) {
-	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "transcriptions"), nil, &[]*Transcription{})
+	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "transcriptions"), &[]*Transcription{})
 	if err != nil {
 		return nil, err
 	}

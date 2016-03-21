@@ -65,7 +65,7 @@ func TestGetPhoneNumber(t *testing.T) {
 		PathAndQuery: "/v1/users/userId/phoneNumbers/123",
 		Method:       http.MethodGet,
 		ContentToSend: `{
-			"id": "{phoneNumberId1}",
+			"id": "123",
 			"number": "phoneNumber1"
 		}`}})
 	defer server.Close()
@@ -74,7 +74,7 @@ func TestGetPhoneNumber(t *testing.T) {
 		t.Error("Failed call of GetPhoneNumber()")
 		return
 	}
-	expect(t, len(result), 2)
+	expect(t, result.ID, "123")
 }
 
 func TestGetPhoneNumberFail(t *testing.T) {

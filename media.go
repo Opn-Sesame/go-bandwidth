@@ -3,22 +3,28 @@ package bandwidth
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
-	"io/ioutil"
 )
 
 const mediaPath = "media"
 
+// MediaFile struct
+type MediaFile struct {
+	ContentLength int64  `json:"contentLength"`
+	Content       string `json:"content"`
+	MediaName     string `json:"mediaName"`
+}
 
 // GetMediaFiles returns  a list of your media files
-func (api *Client) GetMediaFiles() ([]map[string]interface{}, error) {
-	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(mediaPath), nil, []map[string]interface{}{})
+func (api *Client) GetMediaFiles() ([]*MediaFile, error) {
+	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(mediaPath), &[]*MediaFile{})
 	if err != nil {
 		return nil, err
 	}
-	return result.([]map[string]interface{}), nil
+	return *(result.(*[]*MediaFile)), nil
 }
 
 // DeleteMediaFile removes a media file
@@ -67,7 +73,7 @@ func (api *Client) DownloadMediaFile(name string) (io.ReadCloser, string, error)
 	if err != nil {
 		return nil, "", err
 	}
-	if(response.StatusCode >= 400){
+	if response.StatusCode >= 400 {
 		text, _ := ioutil.ReadAll(response.Body)
 		return nil, "", fmt.Errorf("Http code %d: %s", response.StatusCode, text)
 	}

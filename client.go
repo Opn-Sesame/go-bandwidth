@@ -101,7 +101,6 @@ func (c *Client) checkResponse(response *http.Response, responseBody interface{}
 func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
 	request, err := c.createRequest(method, path)
 	var responseBody interface{}
-	responseBody = nil
 	if err != nil {
 		return nil, nil, err
 	}

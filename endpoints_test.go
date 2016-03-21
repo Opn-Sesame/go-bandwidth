@@ -100,7 +100,7 @@ func TestGetDomainEndpoint(t *testing.T) {
 		t.Error("Failed call of GetDomainEndpoint()")
 		return
 	}
-	expect(t, result["name"], "endpoint2")
+	expect(t, result.Name, "endpoint2")
 }
 
 func TestGetDomainEndpointFail(t *testing.T) {

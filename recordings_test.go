@@ -48,7 +48,7 @@ func TestGetRecording(t *testing.T) {
 		t.Error("Failed call of GetRecording()")
 		return
 	}
-	expect(t, result["media"], "recording1")
+	expect(t, result.Media, "recording1")
 }
 
 func TestGetRecordingFail(t *testing.T) {

@@ -54,7 +54,7 @@ func (api *Client) GetAndOrderAvailableNumbers(numberType AvailableNumberType, q
 		q[key] = []string{value}
 	}
 	path := fmt.Sprintf("%s/%s?%s", availableNumbersPath, numberType, q.Encode())
-	result, _, err := api.makeRequest(http.MethodPost, path, &[]*OrderedNumber{})
+	result, _, err := api.makeRequest(http.MethodPost, path, &[]*OrderedNumber{}, nil)
 	if err != nil {
 		return nil, err
 	}

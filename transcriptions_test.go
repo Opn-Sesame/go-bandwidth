@@ -80,7 +80,7 @@ func TestGetRecordingTranscription(t *testing.T) {
 		t.Error("Failed call of GetRecordingTranscription()")
 		return
 	}
-	expect(t, result["text"], "transcription2")
+	expect(t, result.Text, "transcription2")
 }
 
 func TestGetRecordingTranscriptionFail(t *testing.T) {

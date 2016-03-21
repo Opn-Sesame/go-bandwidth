@@ -87,7 +87,7 @@ func TestGetError(t *testing.T) {
 		t.Error("Failed call of GetError()")
 		return
 	}
-	expect(t, result["id"], "{userErrorId2}")
+	expect(t, result.ID, "{userErrorId2}")
 }
 
 func TestGetErrorFail(t *testing.T) {

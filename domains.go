@@ -16,7 +16,7 @@ type Domain struct {
 
 // GetDomains returns  a list of the domains that have been created
 func (api *Client) GetDomains() ([]*Domain, error) {
-	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(domainsPath), nil, &[]*Domain{})
+	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(domainsPath), &[]*Domain{})
 	if err != nil {
 		return nil, err
 	}

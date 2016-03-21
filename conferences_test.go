@@ -47,7 +47,7 @@ func TestGetConference(t *testing.T) {
 		t.Error("Failed call of GetConference()")
 		return
 	}
-	expect(t, result["id"], "{conferenceId}")
+	expect(t, result.ID, "{conferenceId}")
 }
 
 func TestGetConferenceFail(t *testing.T) {
@@ -65,7 +65,7 @@ func TestUpdateConference(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"state":"completed"}`}})
 	defer server.Close()
-	err := api.UpdateConference("123", map[string]interface{}{"state":"completed"})
+	err := api.UpdateConference("123", map[string]interface{}{"state": "completed"})
 	if err != nil {
 		t.Error("Failed call of UpdateConference()")
 		return
@@ -85,11 +85,10 @@ func TestPlayAudioToConference(t *testing.T) {
 	}
 }
 
-
 func TestGetConferenceMembers(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/conferences/123/members",
-		Method:           http.MethodGet,
+		PathAndQuery: "/v1/users/userId/conferences/123/members",
+		Method:       http.MethodGet,
 		ContentToSend: `[
 		{
 			"id": "{memberId1}"
@@ -117,8 +116,8 @@ func TestGetConferenceMembersFail(t *testing.T) {
 
 func TestGetConferenceMember(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/conferences/123/members/456",
-		Method:           http.MethodGet,
+		PathAndQuery: "/v1/users/userId/conferences/123/members/456",
+		Method:       http.MethodGet,
 		ContentToSend: `{
 			"id": "{member1}"
 		}`}})
@@ -128,7 +127,7 @@ func TestGetConferenceMember(t *testing.T) {
 		t.Error("Failed call of GetConferenceMember()")
 		return
 	}
-	expect(t, result["id"], "{member1}")
+	expect(t, result.ID, "{member1}")
 }
 
 func TestGetConferenceMemberFail(t *testing.T) {
@@ -155,7 +154,6 @@ func TestCreateConferenceMember(t *testing.T) {
 	expect(t, id, "456")
 }
 
-
 func TestCreateConferenceMemberFail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/conferences/123/members",
@@ -173,7 +171,7 @@ func TestUpdateConferenceMember(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"mute":"true"}`}})
 	defer server.Close()
-	err := api.UpdateConferenceMember("123", "456",  map[string]interface{}{"mute": "true"})
+	err := api.UpdateConferenceMember("123", "456", map[string]interface{}{"mute": "true"})
 	if err != nil {
 		t.Error("Failed call of UpdateConferenceMember()")
 	}
@@ -185,7 +183,7 @@ func TestUpdateConferenceMemberFail(t *testing.T) {
 		Method:           http.MethodPost,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	err := api.UpdateConferenceMember("123", "456",  map[string]interface{}{"mute": "true"})
+	err := api.UpdateConferenceMember("123", "456", map[string]interface{}{"mute": "true"})
 	if err == nil {
 		t.Error("Should fail here")
 	}

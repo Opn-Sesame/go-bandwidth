@@ -74,7 +74,7 @@ func TestGetMessage(t *testing.T) {
 		t.Error("Failed call of GetMessage()")
 		return
 	}
-	expect(t, result["id"], "{messageId1}")
+	expect(t, result.ID, "{messageId1}")
 }
 
 func TestGetMessageFail(t *testing.T) {

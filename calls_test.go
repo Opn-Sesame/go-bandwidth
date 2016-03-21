@@ -96,7 +96,7 @@ func TestGetCall(t *testing.T) {
 		t.Error("Failed call of GetCall()")
 		return
 	}
-	expect(t, result["id"], "{callId}")
+	expect(t, result.ID, "{callId}")
 }
 
 func TestGetCallFail(t *testing.T) {
@@ -195,7 +195,7 @@ func TestGetCallEvent(t *testing.T) {
 		t.Error("Failed call of GetCallEvent()")
 		return
 	}
-	expect(t, result["id"], "{callEventId1}")
+	expect(t, result.ID, "{callEventId1}")
 }
 
 func TestGetCallEventFail(t *testing.T) {
@@ -310,7 +310,7 @@ func TestGetGather(t *testing.T) {
 		t.Error("Failed call of GetGather()")
 		return
 	}
-	expect(t, result["id"], "{gatherId}")
+	expect(t, result.ID, "{gatherId}")
 }
 
 func TestGetGatherFail(t *testing.T) {

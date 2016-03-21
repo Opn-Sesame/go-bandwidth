@@ -93,6 +93,7 @@ func TestCheckResponse(t *testing.T) {
 	expect(t, testResult.Test, "test")
 }
 
+
 func TestCheckResponseFail(t *testing.T) {
 	api := getAPI()
 	fail := func(action func()(interface{}, http.Header, error)) error{
@@ -141,8 +142,8 @@ func TestMakeRequestWithArrayAsResponse(t *testing.T) {
 		PathAndQuery:  "/v1/test",
 		ContentToSend: `[{"test": "test"}]`}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodGet, "/test")
-	list := result.([]map[string]interface{})
+	result, _, _ := api.makeRequest(http.MethodGet, "/test", &[]map[string]string{})
+	list := *(result.(*[]map[string]string))
 	expect(t, len(list), 1)
 	expect(t, list[0]["test"], "test")
 }
@@ -152,7 +153,7 @@ func TestMakeRequestWithQuery(t *testing.T) {
 		PathAndQuery:  "/v1/test?field1=value1&field2=value+with+space",
 		ContentToSend: `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodGet, "/test", map[string]string{
+	result, _, _ := api.makeRequest(http.MethodGet, "/test", nil, map[string]string{
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
@@ -166,7 +167,7 @@ func TestMakeRequestWithBody(t *testing.T) {
 		EstimatedContent: `{"field1":"value1","field2":"value with space"}`,
 		ContentToSend:    `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodPost, "/test", map[string]interface{}{
+	result, _, _ := api.makeRequest(http.MethodPost, "/test", nil,  map[string]interface{}{
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
@@ -178,12 +179,8 @@ func TestMakeRequestWithEmptyResponse(t *testing.T) {
 		Method:        http.MethodGet,
 		ContentToSend: ""}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodGet, "/test")
-	expectNil(t, result)
-	result, _, _ = api.makeRequest(http.MethodGet, "/test", nil, "default")
-	expect(t, result, "default")
-	result, _, _ = api.makeRequest(http.MethodGet, "/test", map[string]string{}, map[string]interface{}{"test": "test"})
-	expect(t, result.(map[string]interface{})["test"], "test")
+	result, _, _ := api.makeRequest(http.MethodGet, "/test", &[]interface{}{})
+	expect(t, len(*result.(*[]interface{})), 0)
 }
 
 func TestGetIDFromLocationHeader(t *testing.T) {
