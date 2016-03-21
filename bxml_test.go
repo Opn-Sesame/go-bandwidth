@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	bxml "github.com/bandwidthcom/go-bandwidth/xml"
+	bxml "./xml"
 )
 
 func TestToXML(t *testing.T) {
