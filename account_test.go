@@ -19,8 +19,8 @@ func TestGetAccount(t *testing.T) {
 		t.Error("Failed call of GetAccount()")
 		return
 	}
-	expect(t, result["balance"], "100")
-	expect(t, result["accountType"], "pre-pay")
+	expect(t, result.Balance, 100.0)
+	expect(t, result.AccountType, "pre-pay")
 }
 
 func TestGetAccountFail(t *testing.T) {
@@ -63,8 +63,8 @@ func TestGetAccountTransactions(t *testing.T) {
 		return
 	}
 	expect(t, len(result), 2)
-	expect(t, result[0]["id"], "{transactionId1}")
-	expect(t, result[1]["id"], "{transactionId2}")
+	expect(t, result[0].ID, "{transactionId1}")
+	expect(t, result[1].ID, "{transactionId2}")
 }
 
 func TestGetAccountTransactionsFail(t *testing.T) {

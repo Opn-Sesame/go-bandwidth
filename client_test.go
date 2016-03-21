@@ -78,10 +78,19 @@ func TestCreateRequestFail(t *testing.T) {
 }
 
 func TestCheckResponse(t *testing.T) {
+	type Test struct{
+		Test string `json:"test"`
+	}
 	api := getAPI()
-	data, _, _ := api.checkResponse(createFakeResponse(`{"test": "test"}`, 200), nil)
+	data, _, _ := api.checkResponse(createFakeResponse(`{"test": "test"}`, 200), map[string]interface{}{})
 	result := data.(map[string]interface{})
 	expect(t, result["test"].(string), "test")
+	data, _, _ = api.checkResponse(createFakeResponse(`{"test": "test"}`, 200), nil)
+	result = data.(map[string]interface{})
+	expect(t, result["test"].(string), "test")
+	data, _, _ = api.checkResponse(createFakeResponse(`{"test": "test"}`, 200), &Test{})
+	testResult := data.(*Test)
+	expect(t, testResult.Test, "test")
 }
 
 func TestCheckResponseFail(t *testing.T) {
@@ -115,7 +124,7 @@ func TestMakeRequest(t *testing.T) {
 		PathAndQuery:  "/v1/test",
 		ContentToSend: `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodGet, "/test")
+	result, _, _ := api.makeRequest(http.MethodGet, "/test", map[string]interface{}{})
 	expect(t, result.(map[string]interface{})["test"], "test")
 }
 

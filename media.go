@@ -11,6 +11,7 @@ import (
 
 const mediaPath = "media"
 
+
 // GetMediaFiles returns  a list of your media files
 func (api *Client) GetMediaFiles() ([]map[string]interface{}, error) {
 	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(mediaPath), nil, []map[string]interface{}{})

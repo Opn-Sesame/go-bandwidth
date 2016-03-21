@@ -96,7 +96,7 @@ func TestGetBridge(t *testing.T) {
 		t.Error("Failed call of GetBridge()")
 		return
 	}
-	expect(t, result["id"], "{bridgeId}")
+	expect(t, result.ID, "{bridgeId}")
 }
 
 func TestGetBridgeFail(t *testing.T) {

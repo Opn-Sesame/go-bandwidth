@@ -1,28 +1,43 @@
 package bandwidth
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 )
 
 const accountPath = "account"
 
+// Account struct
+type Account struct {
+	Balance     float64 `json:"balance,string"`
+	AccountType string  `json:"accountType"`
+}
+
 // GetAccount returns account information (balance, etc)
-func (api *Client) GetAccount() (map[string] interface{}, error){
-	result, _, err :=  api.makeRequest(http.MethodGet, api.concatUserPath(accountPath))
+func (api *Client) GetAccount() (*Account, error) {
+	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(accountPath), &Account{})
 	if err != nil {
 		return nil, err
 	}
-	return result.(map[string] interface{}), nil
+	return result.(*Account), nil
 }
 
+// AccountTransaction struct
+type AccountTransaction struct {
+	ID          string  `json:"id"`
+	Type        string  `json:"type"`
+	Time        string  `json:"time"`
+	Amount      float64 `json:"amount,string"`
+	Units       string  `json:"units"`
+	ProductType string  `json:"productType"`
+	Number      string  `json:"number"`
+}
 
 // GetAccountTransactions returns transactions from the user's account
-func (api *Client) GetAccountTransactions() ([]map[string] interface{}, error){
-	result, _, err :=  api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(accountPath), "transactions"), nil, []map[string]interface{}{})
+func (api *Client) GetAccountTransactions() ([]*AccountTransaction, error) {
+	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(accountPath), "transactions"), &[]*AccountTransaction{})
 	if err != nil {
 		return nil, err
 	}
-	return result.([]map[string] interface{}), nil
+	return *(result.(*[]*AccountTransaction)), nil
 }
-

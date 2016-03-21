@@ -62,39 +62,31 @@ func (c *Client) createRequest(method, path string) (*http.Request, error) {
 	return request, nil
 }
 
-func (c *Client) checkResponse(response *http.Response, defaultResponseBody interface{}) (interface{}, http.Header, error) {
+func (c *Client) checkResponse(response *http.Response, responseBody interface{}) (interface{}, http.Header, error) {
 	defer response.Body.Close()
-	var body interface{}
+	body := responseBody
+	if body == nil {
+		body = map[string]interface{}{}
+	}
 	rawJSON, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, nil, err
 	}
+	if response.StatusCode >= 200 && response.StatusCode < 400 {
+		if len(rawJSON) > 0 {
+			err = json.Unmarshal([]byte(rawJSON), &body)
+			if err != nil {
+				return nil, nil, err
+			}
+		}
+		return body, response.Header, nil
+	}
+	errorBody := make(map[string]interface{})
 	if len(rawJSON) > 0 {
-		err = json.Unmarshal([]byte(rawJSON), &body)
+		err = json.Unmarshal([]byte(rawJSON), &errorBody)
 		if err != nil {
 			return nil, nil, err
 		}
-	}
-	if response.StatusCode >= 200 && response.StatusCode < 400 {
-		if body == nil {
-			return defaultResponseBody, response.Header, nil
-		}
-		result := body
-		switch body.(type) {
-			case []interface{}:
-				source := body.([]interface{})
-				l := len(source)
-				list := make([]map[string]interface{}, l)
-				for i := 0; i < l; i++ {
-					list[i] = source[i].(map[string]interface{})
-				}
-				result = list
-		}
-		return result, response.Header, nil
-	}
-	errorBody := make(map[string]interface{})
-	if body != nil {
-		errorBody = body.(map[string]interface{})
 	}
 	message := errorBody["message"]
 	if message == nil {
@@ -108,18 +100,21 @@ func (c *Client) checkResponse(response *http.Response, defaultResponseBody inte
 
 func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
 	request, err := c.createRequest(method, path)
-	var defaultResponseBody interface{}
-	defaultResponseBody = nil
+	var responseBody interface{}
+	responseBody = nil
 	if err != nil {
 		return nil, nil, err
 	}
 	if len(data) > 0 {
+		responseBody = data[0]
+	}
+	if len(data) > 1 {
 		if method == "GET" {
 			var item map[string]string
-			if data[0] == nil {
+			if data[1] == nil {
 				item = make(map[string]string)
 			} else {
-				item = data[0].(map[string]string)
+				item = data[1].(map[string]string)
 			}
 			query := make(url.Values)
 			for key, value := range item {
@@ -128,22 +123,19 @@ func (c *Client) makeRequest(method, path string, data ...interface{}) (interfac
 			request.URL.RawQuery = query.Encode()
 		} else {
 			request.Header.Set("Content-Type", "application/json")
-			rawJSON, err := json.Marshal(data[0])
+			rawJSON, err := json.Marshal(data[1])
 			if err != nil {
 				return nil, nil, err
 			}
 			request.Body = nopCloser{bytes.NewReader(rawJSON)}
 		}
 	}
-	if len(data) > 1 {
-		defaultResponseBody = data[1]
-	}
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
 		return nil, nil, err
 	}
-	return c.checkResponse(response, defaultResponseBody)
+	return c.checkResponse(response, responseBody)
 }
 
 func getIDFromLocationHeader(headers http.Header) string{

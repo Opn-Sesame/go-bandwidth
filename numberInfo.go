@@ -1,18 +1,26 @@
 package bandwidth
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 	"net/url"
 )
 
 const numberInfoPath = "phoneNumbers/numberInfo"
 
+// NumberInfo struct
+type NumberInfo struct {
+	Created string `json:"created"`
+	Name    string `json:"name"`
+	Number  string `json:"number"`
+	Updated string `json:"updated"`
+}
+
 // GetNumberInfo returns information fo given number
-func (api *Client) GetNumberInfo(number string) (map[string]interface{}, error) {
-	result, _, err :=  api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", numberInfoPath, url.QueryEscape(number)))
+func (api *Client) GetNumberInfo(number string) (*NumberInfo, error) {
+	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", numberInfoPath, url.QueryEscape(number)), &NumberInfo{})
 	if err != nil {
 		return nil, err
 	}
-	return result.(map[string] interface{}), nil
+	return result.(*NumberInfo), nil
 }

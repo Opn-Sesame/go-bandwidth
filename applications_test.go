@@ -28,7 +28,7 @@ func TestGetApplications(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetApplications()
 	if err != nil {
-		t.Error("Failed call of GetApplications()")
+		t.Errorf("Failed call of GetApplications() %s", err.Error())
 		return
 	}
 	expect(t, len(result), 2)
@@ -50,7 +50,7 @@ func TestGetApplicationsWithQuery(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetApplications(map[string]string{"size": "2"})
 	if err != nil {
-		t.Error("Failed call of GetApplications()")
+		t.Errorf("Failed call of GetApplications() %s", err.Error())
 		return
 	}
 	expect(t, len(result), 1)
@@ -110,7 +110,7 @@ func TestGetApplication(t *testing.T) {
 		t.Error("Failed call of GetApplication()")
 		return
 	}
-	expect(t, result["id"], "{applicationId}")
+	expect(t, result.ID, "{applicationId}")
 }
 
 func TestGetApplicationFail(t *testing.T) {
