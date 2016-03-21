@@ -21,6 +21,7 @@ type Client struct {
 
 // New creates new instances of api
 // It returns Client instance. Use it to make API calls.
+// example: api := bandwidth.New("userId", "apiToken", "apiSecret")
 func New(userID, apiToken, apiSecret string, other ...string) (*Client, error) {
 	apiVersion := "v1"
 	apiEndPoint := "https://api.catapult.inetwork.com"

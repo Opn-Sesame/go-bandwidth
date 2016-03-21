@@ -33,9 +33,11 @@ Also you can work with Bandwidth XML using special types.
 
 * Install `go-bandwidth`,
 * **Get user id, api token and secret** - to use the Catapult API you need these data.  You can get them [here](https://catapult.inetwork.com/pages/catapult.jsf) on the tab "Account",
-* **Set user id, api token and secret** - you can do that with 2 ways:
 
-TODO:
+```golang
+	api := bandwidth.New("userId", "apiToken", "apiSecret")
+	callId, err := api.CallTo("+1-from-number", "+1-to-number")
+```
 
 
 
