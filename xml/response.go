@@ -2,7 +2,6 @@ package xml
 
 import (
     "encoding/xml"
-	//"fmt"
 )
 
 
