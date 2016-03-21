@@ -5,12 +5,12 @@ import (
 )
 
 
-// Response is response lemenet of BXML
+// Response is response element of BXML
 type Response struct {
 	Verbs []interface{} `xml:"."`
 }
 
-// ToXML build BXML as string
+// ToXML builds BXML as string
 func (r *Response) ToXML() string{
 	bytes, _ := xml.Marshal(r)
 	return string(bytes)
