@@ -40,7 +40,7 @@ func (api *Client) GetMessages(query ...map[string]string) ([]*Message, error) {
 
 // CreateMessage sends a message (SMS/MMS)
 // It returns ID of created message or error
-func (api *Client) CreateMessage(data map[string]interface{}) (string, error) {
+func (api *Client) CreateMessage(data interface{}) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, api.concatUserPath(messagesPath), nil, data)
 	if err != nil {
 		return "", err
