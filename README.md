@@ -41,5 +41,5 @@ Also you can work with Bandwidth XML using special types.
 
 
 
-See directory `samples` for more examples.
+See directory `examples` for more samples.
 

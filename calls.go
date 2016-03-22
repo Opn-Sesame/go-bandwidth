@@ -22,6 +22,12 @@ type Call struct {
 	State                string `json:"state"`
 	To                   string `json:"to"`
 	TranscriptionEnabled bool   `json:"transcriptionEnabled"`
+	SipHeaders           map[string]string `json:"sipHeaders"`
+	ConferenceID           string `json:"conferenceId"`
+	BridgeID           string `json:"bridgeId"`
+	TransferCallerID string `json:"transferCallerId"`
+	TransferTo string `json:"transferTo"`
+	Tag string `json:"tag"`
 }
 
 // GetCalls returns list of previous calls that were made or received
