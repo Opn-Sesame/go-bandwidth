@@ -5,7 +5,7 @@ import "os"
 import "fmt"
 import "strings"
 
-func main() {
+func main2() {
 	api, _ := bandwidth.New(os.Getenv("CATAPULT_USER_ID"), os.Getenv("CATAPULT_API_TOKEN"), os.Getenv("CATAPULT_API_SECRET"))
 	numbersResult, _ := api.GetAvailableNumbers(bandwidth.AvailableNumberTypeLocal, map[string]string{"city": "Cary", "state": "NC", "quantity": "3"})
 	l := len(numbersResult)

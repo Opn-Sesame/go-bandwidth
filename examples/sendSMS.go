@@ -5,7 +5,7 @@ import "os"
 import "fmt"
 
 //run: sendSMS <from-number> <to-number> <text>
-func main() {
+func main5() {
 	api, _ := bandwidth.New(os.Getenv("CATAPULT_USER_ID"), os.Getenv("CATAPULT_API_TOKEN"), os.Getenv("CATAPULT_API_SECRET"))
 	fromNumber := os.Args[1]
 	toNumber := os.Args[2]

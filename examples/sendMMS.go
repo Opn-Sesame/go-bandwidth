@@ -18,7 +18,7 @@ func randomString(n int) string {
 
 
 //run: sendMMS <from-number> <to-number> <text> <path-to-jpg-file-to-attach>
-func main() {
+func main4() {
 	api, _ := bandwidth.New(os.Getenv("CATAPULT_USER_ID"), os.Getenv("CATAPULT_API_TOKEN"), os.Getenv("CATAPULT_API_SECRET"))
 	fromNumber := os.Args[1]
 	toNumber := os.Args[2]
