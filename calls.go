@@ -9,25 +9,25 @@ const callsPath = "calls"
 
 // Call struct
 type Call struct {
-	ID                   string `json:"id"`
-	ActiveTime           string `json:"activeTime"`
-	ChargeableDuration   int    `json:"chargeableDuration"`
-	Direction            string `json:"direction"`
-	Events               string `json:"events"`
-	EndTime              string `json:"endTime"`
-	From                 string `json:"from"`
-	RecordingFileFormat  string `json:"recordingFileFormat"`
-	RecordingEnabled     bool   `json:"recordingEnabled"`
-	StartTime            string `json:"startTime"`
-	State                string `json:"state"`
-	To                   string `json:"to"`
-	TranscriptionEnabled bool   `json:"transcriptionEnabled"`
+	ID                   string            `json:"id"`
+	ActiveTime           string            `json:"activeTime"`
+	ChargeableDuration   int               `json:"chargeableDuration"`
+	Direction            string            `json:"direction"`
+	Events               string            `json:"events"`
+	EndTime              string            `json:"endTime"`
+	From                 string            `json:"from"`
+	RecordingFileFormat  string            `json:"recordingFileFormat"`
+	RecordingEnabled     bool              `json:"recordingEnabled"`
+	StartTime            string            `json:"startTime"`
+	State                string            `json:"state"`
+	To                   string            `json:"to"`
+	TranscriptionEnabled bool              `json:"transcriptionEnabled"`
 	SipHeaders           map[string]string `json:"sipHeaders"`
-	ConferenceID           string `json:"conferenceId"`
-	BridgeID           string `json:"bridgeId"`
-	TransferCallerID string `json:"transferCallerId"`
-	TransferTo string `json:"transferTo"`
-	Tag string `json:"tag"`
+	ConferenceID         string            `json:"conferenceId"`
+	BridgeID             string            `json:"bridgeId"`
+	TransferCallerID     string            `json:"transferCallerId"`
+	TransferTo           string            `json:"transferTo"`
+	Tag                  string            `json:"tag"`
 }
 
 // GetCalls returns list of previous calls that were made or received
@@ -115,7 +115,7 @@ func (api *Client) GetCallEvent(id string, eventID string) (*CallEvent, error) {
 // GetCallRecordings returns  all recordings related to the call
 // It return list of Recording instances or error
 func (api *Client) GetCallRecordings(id string) ([]*Recording, error) {
-	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "recordings"),  &[]*Recording{})
+	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(callsPath), id, "recordings"), &[]*Recording{})
 	if err != nil {
 		return nil, err
 	}
