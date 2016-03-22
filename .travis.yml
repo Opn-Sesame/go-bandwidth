@@ -8,8 +8,8 @@ before_install:
   - export PATH=$HOME/gopath/bin:$PATH
 
 script:
-  - go test -race ./...
-  - go test -cover ./...
+  - go test -race
+  - go test -cover
 
 matrix:
     allow_failures:
