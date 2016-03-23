@@ -41,7 +41,6 @@ func (api *Client) GetApplications(query ...*GetApplicationQuery) ([]*Applicatio
 	return *(result.(*[]*Application)), nil
 }
 
-
 // ApplicationData struct
 type ApplicationData struct {
 	Name                              string `json:"name,omitempty"`
@@ -54,7 +53,6 @@ type ApplicationData struct {
 	CallbackHTTPMethod                string `json:"callbackHttpMethod,omitempty"`
 	AutoAnswer                        bool   `json:"autoAnswer,omitempty"`
 }
-
 
 // CreateApplication creates an application that can handle calls and messages for one of your phone number. Many phone numbers can share an application.
 // It returns ID of created application or error
