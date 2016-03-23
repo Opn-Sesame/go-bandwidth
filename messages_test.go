@@ -25,6 +25,26 @@ func TestGetMessages(t *testing.T) {
 	expect(t, len(result), 2)
 }
 
+func TestGetMessagesWithQuery(t *testing.T) {
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery: "/v1/users/userId/messages?to=123",
+		Method:       http.MethodGet,
+		ContentToSend: `[{
+			"id": "{messageId1}",
+			"text": "message1"
+		}, {
+			"id": "{messageId2}",
+			"text": "message2"
+		}]`}})
+	defer server.Close()
+	result, err := api.GetMessages(&GetMessagesQuery{To: "123"})
+	if err != nil {
+		t.Error("Failed call of GetMessages()")
+		return
+	}
+	expect(t, len(result), 2)
+}
+
 func TestGetMessagesFail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/messages",

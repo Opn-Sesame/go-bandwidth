@@ -23,10 +23,17 @@ type ErrorDetail struct {
 	Value string `json:"value"`
 }
 
+// GetErrorsQuery is optional parameters of GetErrors()
+type GetErrorsQuery struct {
+	Page int
+	Size int
+}
+
+
 // GetErrors returns list of errors
 // It returns list of Error instances or error
-func (api *Client) GetErrors(query ...map[string]string) ([]*Error, error) {
-	var options map[string]string
+func (api *Client) GetErrors(query ...*GetErrorsQuery) ([]*Error, error) {
+	var options *GetErrorsQuery
 	if len(query) > 0 {
 		options = query[0]
 	}

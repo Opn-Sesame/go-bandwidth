@@ -9,23 +9,23 @@ const messagesPath = "messages"
 
 // Message struct
 type Message struct {
-	ID                 string   `json:"id"`
-	From               string   `json:"from"`
-	To                 string   `json:"to"`
-	Direction          string   `json:"direction"`
-	Text               string   `json:"text"`
-	Media              []string `json:"media"`
-	State              string   `json:"state"`
-	Time               string   `json:"time"`
-	CallbackURL        string   `json:"callbackUrl"`
-	CallbackHTTPMethod string   `json:"callbackHttpMethod,omitempty"`
-	FallbackURL        string   `json:"fallbackUrl,omitempty"`
-	CallbackTimeout    int      `json:"callbackTimeout,omitempty"`
-	ReceiptRequested    string `json:"receiptRequested"`
-	DeliveryState       string `json:"deliveryState"`
-	DeliveryCode        string `json:"deliveryCode"`
-	DeliveryDescription string `json:"deliveryDescription"`
-	Tag                 string `json:"tag"`
+	ID                  string   `json:"id"`
+	From                string   `json:"from"`
+	To                  string   `json:"to"`
+	Direction           string   `json:"direction"`
+	Text                string   `json:"text"`
+	Media               []string `json:"media"`
+	State               string   `json:"state"`
+	Time                string   `json:"time"`
+	CallbackURL         string   `json:"callbackUrl"`
+	CallbackHTTPMethod  string   `json:"callbackHttpMethod,omitempty"`
+	FallbackURL         string   `json:"fallbackUrl,omitempty"`
+	CallbackTimeout     int      `json:"callbackTimeout,omitempty"`
+	ReceiptRequested    string   `json:"receiptRequested"`
+	DeliveryState       string   `json:"deliveryState"`
+	DeliveryCode        string   `json:"deliveryCode"`
+	DeliveryDescription string   `json:"deliveryDescription"`
+	Tag                 string   `json:"tag"`
 }
 
 // CreateMessageData struct
@@ -42,10 +42,24 @@ type CreateMessageData struct {
 	Tag                string   `json:"tag,omitempty"`
 }
 
+// GetMessagesQuery is optional parameters of GetMessages()
+type GetMessagesQuery struct {
+	Page          int
+	Size          int
+	From          string
+	To            string
+	FromDateTime  string
+	ToDateTime    string
+	Direction     string
+	State         string
+	DeliveryState string
+	SortOrder     string
+}
+
 // GetMessages returns list of all messages
 // It returns list of Message instances or error
-func (api *Client) GetMessages(query ...map[string]string) ([]*Message, error) {
-	var options map[string]string
+func (api *Client) GetMessages(query ...*GetMessagesQuery) ([]*Message, error) {
+	var options *GetMessagesQuery
 	if len(query) > 0 {
 		options = query[0]
 	}

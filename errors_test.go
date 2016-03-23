@@ -52,7 +52,7 @@ func TestGetErrorsWithQuery(t *testing.T) {
 			"code" : "no-application-for-number"
 		}]`}})
 	defer server.Close()
-	result, err := api.GetErrors(map[string]string{"size": "2"})
+	result, err := api.GetErrors(&GetErrorsQuery{Size: 2})
 	if err != nil {
 		t.Error("Failed call of GetErrors()")
 		return
