@@ -9,19 +9,37 @@ const messagesPath = "messages"
 
 // Message struct
 type Message struct {
-	ID                  string   `json:"id"`
-	From                string   `json:"from"`
-	To                  string   `json:"to"`
-	Direction           string   `json:"direction"`
-	Text                string   `json:"text"`
-	Media               []string `json:"media"`
-	State               string   `json:"state"`
-	Time                string   `json:"time"`
-	CallbackURL         string   `json:"callbackUrl"`
-	ReceiptRequested    string   `json:"receiptRequested"`
-	DeliveryState       string   `json:"deliveryState"`
-	DeliveryCode        string   `json:"deliveryCode"`
-	DeliveryDescription string   `json:"deliveryDescription"`
+	ID                 string   `json:"id"`
+	From               string   `json:"from"`
+	To                 string   `json:"to"`
+	Direction          string   `json:"direction"`
+	Text               string   `json:"text"`
+	Media              []string `json:"media"`
+	State              string   `json:"state"`
+	Time               string   `json:"time"`
+	CallbackURL        string   `json:"callbackUrl"`
+	CallbackHTTPMethod string   `json:"callbackHttpMethod,omitempty"`
+	FallbackURL        string   `json:"fallbackUrl,omitempty"`
+	CallbackTimeout    int      `json:"callbackTimeout,omitempty"`
+	ReceiptRequested    string `json:"receiptRequested"`
+	DeliveryState       string `json:"deliveryState"`
+	DeliveryCode        string `json:"deliveryCode"`
+	DeliveryDescription string `json:"deliveryDescription"`
+	Tag                 string `json:"tag"`
+}
+
+// CreateMessageData struct
+type CreateMessageData struct {
+	From               string   `json:"from,omitempty"`
+	To                 string   `json:"to,omitempty"`
+	Text               string   `json:"text,omitempty"`
+	Media              []string `json:"media,omitempty"`
+	CallbackURL        string   `json:"callbackUrl,omitempty"`
+	CallbackHTTPMethod string   `json:"callbackHttpMethod,omitempty"`
+	FallbackURL        string   `json:"fallbackUrl,omitempty"`
+	CallbackTimeout    int      `json:"callbackTimeout,omitempty"`
+	ReceiptRequested   string   `json:"receiptRequested,omitempty"`
+	Tag                string   `json:"tag,omitempty"`
 }
 
 // GetMessages returns list of all messages
@@ -40,7 +58,7 @@ func (api *Client) GetMessages(query ...map[string]string) ([]*Message, error) {
 
 // CreateMessage sends a message (SMS/MMS)
 // It returns ID of created message or error
-func (api *Client) CreateMessage(data interface{}) (string, error) {
+func (api *Client) CreateMessage(data *CreateMessageData) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, api.concatUserPath(messagesPath), nil, data)
 	if err != nil {
 		return "", err

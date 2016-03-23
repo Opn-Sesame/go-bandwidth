@@ -38,10 +38,10 @@ func TestCreateMessage(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/messages",
 		Method:           http.MethodPost,
-		EstimatedContent: `{"from":"fromNumber","text":"text","to":"toNumber"}`,
+		EstimatedContent: `{"from":"fromNumber","to":"toNumber","text":"text"}`,
 		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/messages/123"}}})
 	defer server.Close()
-	id, err := api.CreateMessage(map[string]interface{}{"from": "fromNumber", "to": "toNumber", "text": "text"})
+	id, err := api.CreateMessage(&CreateMessageData{From: "fromNumber", To: "toNumber", Text: "text"})
 	if err != nil {
 		t.Error("Failed call of CreateMessage()")
 		return
@@ -56,7 +56,7 @@ func TestCreateMessageFail(t *testing.T) {
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreateMessage(map[string]interface{}{"from": "fromNumber", "to": "toNumber", "text": "text"})
+		return api.CreateMessage(&CreateMessageData{From: "fromNumber", To: "toNumber", Text: "text"})
 	})
 }
 
