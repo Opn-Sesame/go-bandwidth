@@ -69,12 +69,12 @@ func TestCreateApplication(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery: "/v1/users/userId/applications",
 		Method:       http.MethodPost,
-		EstimatedContent: `{"incomingCallUrl":"http://example.com/calls.php","name":"MyFirstApp"}`,
+		EstimatedContent: `{"name":"MyFirstApp","incomingCallUrl":"http://example.com/calls.php"}`,
 		HeadersToSend: map[string]string{"Location": "/v1/users/{userId}/applications/123"}}})
 	defer server.Close()
-	id, err := api.CreateApplication(map[string]interface{}{
-		"name": "MyFirstApp",
-		"incomingCallUrl": "http://example.com/calls.php"})
+	id, err := api.CreateApplication(&ApplicationData{
+		Name: "MyFirstApp",
+		IncomingCallURL: "http://example.com/calls.php"})
 	if err != nil {
 		t.Error("Failed call of CreateApplication()")
 		return
@@ -88,9 +88,9 @@ func TestCreateApplicationFail(t *testing.T) {
 		Method:       http.MethodPost,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	shouldFail(t, func()(interface{}, error){ return api.CreateApplication(map[string]interface{}{
-		"name": "MyFirstApp",
-		"incomingCallUrl": "http://example.com/calls.php"}) })
+	shouldFail(t, func()(interface{}, error){ return api.CreateApplication(&ApplicationData{
+		Name: "MyFirstApp",
+		IncomingCallURL: "http://example.com/calls.php"}) })
 }
 
 func TestGetApplication(t *testing.T) {
@@ -128,7 +128,7 @@ func TestUpdateApplication(t *testing.T) {
 		Method:       http.MethodPost,
 		EstimatedContent: `{"incomingCallUrl":"http://example.com/calls.php"}`}})
 	defer server.Close()
-	err := api.UpdateApplication("123", &Application{IncomingCallURL: "http://example.com/calls.php"})
+	err := api.UpdateApplication("123", &ApplicationData{IncomingCallURL: "http://example.com/calls.php"})
 	if err != nil {
 		t.Error("Failed call of UpdateApplication()")
 		return

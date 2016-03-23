@@ -21,7 +21,7 @@ type Application struct {
 	AutoAnswer                        bool   `json:"autoAnswer,omitempty"`
 }
 
-// GetApplicationQuery is optional parameters of GetApplication()
+// GetApplicationQuery is optional parameters of GetApplications()
 type GetApplicationQuery struct {
 	Page int
 	Size int
@@ -41,9 +41,24 @@ func (api *Client) GetApplications(query ...*GetApplicationQuery) ([]*Applicatio
 	return *(result.(*[]*Application)), nil
 }
 
+
+// ApplicationData struct
+type ApplicationData struct {
+	Name                              string `json:"name,omitempty"`
+	IncomingCallURL                   string `json:"incomingCallUrl,omitempty"`
+	IncomingCallURLCallbackTimeout    int    `json:"incomingCallUrlCallbackTimeout,omitempty"`
+	IncomingCallFallbackURL           string `json:"incomingCallFallbackUrl,omitempty"`
+	IncomingMessageURL                string `json:"incomingMessageUrl,omitempty"`
+	IncomingMessageURLCallbackTimeout int    `json:"incomingMessageUrlCallbackTimeout,omitempty"`
+	IncomingMessageFallbackURL        string `json:"incomingMessageFallbackUrl,omitempty"`
+	CallbackHTTPMethod                string `json:"callbackHttpMethod,omitempty"`
+	AutoAnswer                        bool   `json:"autoAnswer,omitempty"`
+}
+
+
 // CreateApplication creates an application that can handle calls and messages for one of your phone number. Many phone numbers can share an application.
 // It returns ID of created application or error
-func (api *Client) CreateApplication(data map[string]interface{}) (string, error) {
+func (api *Client) CreateApplication(data *ApplicationData) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, api.concatUserPath(applicationsPath), nil, data)
 	if err != nil {
 		return "", err
@@ -63,7 +78,7 @@ func (api *Client) GetApplication(id string) (*Application, error) {
 
 // UpdateApplication makes changes to an application
 // It returns error object
-func (api *Client) UpdateApplication(id string, changedData *Application) error {
+func (api *Client) UpdateApplication(id string, changedData *ApplicationData) error {
 	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(applicationsPath), id), nil, changedData)
 	return err
 }
