@@ -12,8 +12,7 @@ func TestCreateConference(t *testing.T) {
 		EstimatedContent: `{"from":"fromNumber"}`,
 		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/conferences/123"}}})
 	defer server.Close()
-	id, err := api.CreateConference(map[string]interface{}{
-		"from": "fromNumber"})
+	id, err := api.CreateConference(&CreateConferenceData{From: "fromNumber"})
 	if err != nil {
 		t.Error("Failed call of CreateConference()")
 		return
@@ -28,8 +27,7 @@ func TestCreateConferenceFail(t *testing.T) {
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreateConference(map[string]interface{}{
-			"from": "fromNumber"})
+		return api.CreateConference(&CreateConferenceData{From: "fromNumber"})
 	})
 }
 
@@ -65,7 +63,7 @@ func TestUpdateConference(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"state":"completed"}`}})
 	defer server.Close()
-	err := api.UpdateConference("123", map[string]interface{}{"state": "completed"})
+	err := api.UpdateConference("123",&UpdateConferenceData{State: "completed"})
 	if err != nil {
 		t.Error("Failed call of UpdateConference()")
 		return
@@ -78,7 +76,7 @@ func TestPlayAudioToConference(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"fileUrl":"file.mp3"}`}})
 	defer server.Close()
-	err := api.PlayAudioToConference("123", map[string]interface{}{"fileUrl": "file.mp3"})
+	err := api.PlayAudioToConference("123", &PlayAudioData{FileURL: "file.mp3"})
 	if err != nil {
 		t.Error("Failed call of PlayAudioToConference()")
 		return
@@ -146,7 +144,7 @@ func TestCreateConferenceMember(t *testing.T) {
 		EstimatedContent: `{"callId":"callId"}`,
 		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/conferences/123/members/456"}}})
 	defer server.Close()
-	id, err := api.CreateConferenceMember("123", map[string]interface{}{"callId": "callId"})
+	id, err := api.CreateConferenceMember("123", &CreateConferenceMemberData{CallID: "callId"})
 	if err != nil {
 		t.Error("Failed call of CreateConferenceMember()")
 		return
@@ -161,7 +159,7 @@ func TestCreateConferenceMemberFail(t *testing.T) {
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreateConferenceMember("123", map[string]interface{}{"callId": "callId"})
+		return api.CreateConferenceMember("123", &CreateConferenceMemberData{CallID: "callId"})
 	})
 }
 
@@ -171,7 +169,7 @@ func TestUpdateConferenceMember(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"mute":"true"}`}})
 	defer server.Close()
-	err := api.UpdateConferenceMember("123", "456", map[string]interface{}{"mute": "true"})
+	err := api.UpdateConferenceMember("123", "456", &UpdateConferenceMemberData{Mute: true})
 	if err != nil {
 		t.Error("Failed call of UpdateConferenceMember()")
 	}
@@ -183,7 +181,7 @@ func TestUpdateConferenceMemberFail(t *testing.T) {
 		Method:           http.MethodPost,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	err := api.UpdateConferenceMember("123", "456", map[string]interface{}{"mute": "true"})
+	err := api.UpdateConferenceMember("123", "456", &UpdateConferenceMemberData{Mute: true})
 	if err == nil {
 		t.Error("Should fail here")
 	}
@@ -195,9 +193,14 @@ func TestPlayAudioToConferenceMember(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"fileUrl":"file.mp3"}`}})
 	defer server.Close()
-	err := api.PlayAudioToConferenceMember("123", "456", map[string]interface{}{"fileUrl": "file.mp3"})
+	err := api.PlayAudioToConferenceMember("123", "456", &PlayAudioData{FileURL: "file.mp3"})
 	if err != nil {
 		t.Error("Failed call of PlayAudioToConferenceMember()")
 		return
 	}
+}
+
+func TestConferenceMemberGetCallID(t *testing.T) {
+	member := &ConferenceMember{Call: "http://host/123"}
+	expect(t, member.GetCallID(), "123")
 }
