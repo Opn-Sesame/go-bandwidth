@@ -147,15 +147,15 @@ Generate Bandwidth XML
    )
    
    response := &xml.Response{}
-   speakSentence := xml.SpeakSentence{Sentence = "Transferring your call, please wait.", Voice = "paul", Gender = "male", Locale = "en_US"}
+   speakSentence := xml.SpeakSentence{Sentence: "Transferring your call, please wait.", Voice: "paul", Gender: "male", Locale: "en_US"}
    transfer := xml.Transfer{
-        TransferTo = "+13032218749",
-        TransferCallerId = "private",
-        SpeakSentence = &SpeakSentence{
-            Sentence = "Inner speak sentence.",
-            Voice = "paul",
-            Gender = "male",
-            Locale = "en_US"}}
+        TransferTo: "+13032218749",
+        TransferCallerId: "private",
+        SpeakSentence: &SpeakSentence{
+            Sentence: "Inner speak sentence.",
+            Voice: "paul",
+            Gender: "male",
+            Locale: "en_US"}}
     hangup := xml.Hangup{}
 
     append(response.Verbs, speakSentence)
