@@ -48,7 +48,7 @@ func TestGetApplicationsWithQuery(t *testing.T) {
 			}
 		]`}})
 	defer server.Close()
-	result, err := api.GetApplications(map[string]string{"size": "2"})
+	result, err := api.GetApplications(&GetApplicationQuery{Size: 2})
 	if err != nil {
 		t.Errorf("Failed call of GetApplications() %s", err.Error())
 		return
@@ -128,7 +128,7 @@ func TestUpdateApplication(t *testing.T) {
 		Method:       http.MethodPost,
 		EstimatedContent: `{"incomingCallUrl":"http://example.com/calls.php"}`}})
 	defer server.Close()
-	err := api.UpdateApplication("123", map[string]interface{}{	"incomingCallUrl": "http://example.com/calls.php"})
+	err := api.UpdateApplication("123", &Application{IncomingCallURL: "http://example.com/calls.php"})
 	if err != nil {
 		t.Error("Failed call of UpdateApplication()")
 		return

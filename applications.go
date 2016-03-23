@@ -9,17 +9,28 @@ const applicationsPath = "applications"
 
 // Application struct
 type Application struct {
-	ID                 string `json:"id"`
-	Name               string `json:"name"`
-	IncomingCallURL    string `json:"incomingCallUrl"`
-	IncomingMessageURL string `json:"incomingMessageUrl"`
-	AutoAnswer         bool   `json:"autoAnswer"`
+	ID                                string `json:"id,omitempty"`
+	Name                              string `json:"name,omitempty"`
+	IncomingCallURL                   string `json:"incomingCallUrl,omitempty"`
+	IncomingCallURLCallbackTimeout    int    `json:"incomingCallUrlCallbackTimeout,omitempty"`
+	IncomingCallFallbackURL           string `json:"incomingCallFallbackUrl,omitempty"`
+	IncomingMessageURL                string `json:"incomingMessageUrl,omitempty"`
+	IncomingMessageURLCallbackTimeout int    `json:"incomingMessageUrlCallbackTimeout,omitempty"`
+	IncomingMessageFallbackURL        string `json:"incomingMessageFallbackUrl,omitempty"`
+	CallbackHTTPMethod                string `json:"callbackHttpMethod,omitempty"`
+	AutoAnswer                        bool   `json:"autoAnswer,omitempty"`
+}
+
+// GetApplicationQuery is optional parameters of GetApplication()
+type GetApplicationQuery struct {
+	Page int
+	Size int
 }
 
 // GetApplications returns list of user's applications
 // It returns list of Application instances or error
-func (api *Client) GetApplications(query ...map[string]string) ([]*Application, error) {
-	var options map[string]string
+func (api *Client) GetApplications(query ...*GetApplicationQuery) ([]*Application, error) {
+	var options *GetApplicationQuery
 	if len(query) > 0 {
 		options = query[0]
 	}
@@ -52,8 +63,8 @@ func (api *Client) GetApplication(id string) (*Application, error) {
 
 // UpdateApplication makes changes to an application
 // It returns error object
-func (api *Client) UpdateApplication(id string, data map[string]interface{}) error {
-	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(applicationsPath), id), nil, data)
+func (api *Client) UpdateApplication(id string, changedData *Application) error {
+	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(applicationsPath), id), nil, changedData)
 	return err
 }
 

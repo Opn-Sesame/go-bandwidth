@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"reflect"
 )
 
 // Client is main API object
@@ -115,7 +116,26 @@ func (c *Client) makeRequest(method, path string, data ...interface{}) (interfac
 			if data[1] == nil {
 				item = make(map[string]string)
 			} else {
-				item = data[1].(map[string]string)
+				var ok bool
+				item, ok = data[1].(map[string]string)
+				if !ok {
+					item = make(map[string]string)
+					structType := reflect.TypeOf(data[1]).Elem()
+					structValue := reflect.ValueOf(data[1])
+					if !structValue.IsNil() {
+						structValue = structValue.Elem();
+						fieldCount := structType.NumField()
+						for i := 0; i < fieldCount; i++{
+							fieldName :=  structType.Field(i).Name
+							fieldValue := structValue.Field(i).Interface()
+							if fieldValue == reflect.Zero(structType.Field(i).Type).Interface() {
+								//ignore fields with default values
+								continue
+							}
+							item[strings.ToLower(string(fieldName[0])) + fieldName[1:]] = fmt.Sprintf("%v", fieldValue)
+						}
+					}
+				}
 			}
 			query := make(url.Values)
 			for key, value := range item {
