@@ -54,9 +54,9 @@ func TestCreateBridge(t *testing.T) {
 		EstimatedContent: `{"bridgeAudio":"true","callIds":["{callId1}","{callId2}"]}`,
 		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/bridges/123"}}})
 	defer server.Close()
-	id, err := api.CreateBridge(map[string]interface{}{
-		"bridgeAudio": "true",
-		"callIds":     []string{"{callId1}", "{callId2}"}})
+	id, err := api.CreateBridge(&BridgeData{
+		BridgeAudio: true,
+		CallIDs:  []string{"{callId1}", "{callId2}"}})
 	if err != nil {
 		t.Error("Failed call of CreateBridge()")
 		return
@@ -71,9 +71,9 @@ func TestCreateBridgeFail(t *testing.T) {
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreateBridge(map[string]interface{}{
-			"bridgeAudio": "true",
-			"callIds":     []string{"{callId1}", "{callId2}"}})
+		return api.CreateBridge(&BridgeData{
+		BridgeAudio: true,
+		CallIDs:  []string{"{callId1}", "{callId2}"}})
 	})
 }
 
@@ -114,7 +114,8 @@ func TestUpdateBridge(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"callIds":["{callId1}","{callId2}"]}`}})
 	defer server.Close()
-	err := api.UpdateBridge("123", map[string]interface{}{"callIds": []string{"{callId1}", "{callId2}"}})
+	err := api.UpdateBridge("123", &BridgeData{
+		CallIDs:  []string{"{callId1}", "{callId2}"}})
 	if err != nil {
 		t.Error("Failed call of UpdateBridge()")
 		return
@@ -127,7 +128,7 @@ func TestPlayAudioToBridge(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"fileUrl":"file.mp3"}`}})
 	defer server.Close()
-	err := api.PlayAudioToBridge("123", map[string]interface{}{"fileUrl": "file.mp3"})
+	err := api.PlayAudioToBridge("123", &PlayAudioData{FileURL: "file.mp3"})
 	if err != nil {
 		t.Error("Failed call of PlayAudioToBridge()")
 		return

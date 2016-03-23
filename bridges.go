@@ -9,13 +9,13 @@ const bridgesPath = "bridges"
 
 // Bridge struct
 type Bridge struct {
-	ID            string `json:"id"`
-	State         string `json:"state"`
-	BridgeAudio   bool   `json:"bridgeAudio,string"`
-	Calls         string `json:"calls"`
-	CreatedTime   string `json:"createdTime"`
-	ActivatedTime string `json:"activatedTime"`
-	CompletedTime string `json:"completedTime"`
+	ID            string   `json:"id"`
+	State         string   `json:"state"`
+	BridgeAudio   bool     `json:"bridgeAudio,string"`
+	CallIDs       []string `json:"callIds"`
+	CreatedTime   string   `json:"createdTime"`
+	ActivatedTime string   `json:"activatedTime"`
+	CompletedTime string   `json:"completedTime"`
 }
 
 // GetBridges returns list of previous bridges
@@ -28,9 +28,15 @@ func (api *Client) GetBridges() ([]*Bridge, error) {
 	return *(result.(*[]*Bridge)), nil
 }
 
+// BridgeData struct
+type BridgeData struct {
+	BridgeAudio bool     `json:"bridgeAudio,string,omitempty"`
+	CallIDs     []string `json:"callIds,omitempty"`
+}
+
 // CreateBridge creates a bridge
 // It returns ID of created bridge
-func (api *Client) CreateBridge(data map[string]interface{}) (string, error) {
+func (api *Client) CreateBridge(data *BridgeData) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, api.concatUserPath(bridgesPath), nil, data)
 	if err != nil {
 		return "", err
@@ -50,14 +56,24 @@ func (api *Client) GetBridge(id string) (*Bridge, error) {
 
 // UpdateBridge adds one or two calls in a bridge and also puts the bridge on hold/unhold
 // It returns error object
-func (api *Client) UpdateBridge(id string, data map[string]interface{}) error {
-	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(bridgesPath), id), nil, data)
+func (api *Client) UpdateBridge(id string, changedData *BridgeData) error {
+	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(bridgesPath), id), nil, changedData)
 	return err
+}
+
+// PlayAudioData struct
+type PlayAudioData struct {
+	FileURL     string `json:"fileUrl,omitempty"`
+	Sentence    string `json:"sentence,omitempty"`
+	Gender      string `json:"gender,omitempty"`
+	Locale      string `json:"locale,omitempty"`
+	Voice       string `json:"voice,omitempty"`
+	LoopEnabled bool   `json:"loopEnabled,omitempty"`
 }
 
 // PlayAudioToBridge plays an audio or speak a sentence in a bridge
 // It returns error object
-func (api *Client) PlayAudioToBridge(id string, data map[string]interface{}) error {
+func (api *Client) PlayAudioToBridge(id string, data *PlayAudioData) error {
 	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(bridgesPath), id, "audio"), nil, data)
 	return err
 }
