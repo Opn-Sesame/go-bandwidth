@@ -29,12 +29,8 @@ func (api *Client) GetRecordingTranscriptions(id string) ([]*Transcription, erro
 
 // CreateRecordingTranscription creates a new transcription for a recording
 // It returns ID of created transcription or error
-func (api *Client) CreateRecordingTranscription(id string, data ...map[string]interface{}) (string, error) {
-	item := map[string]interface{}{}
-	if len(data) > 0 {
-		item = data[0]
-	}
-	_, headers, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(recordingsPath), id, transcriptionsPath), nil, item)
+func (api *Client) CreateRecordingTranscription(id string) (string, error) {
+	_, headers, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(recordingsPath), id, transcriptionsPath))
 	if err != nil {
 		return "", err
 	}
@@ -43,8 +39,8 @@ func (api *Client) CreateRecordingTranscription(id string, data ...map[string]in
 
 // GetRecordingTranscription returns   single enpoint for a recording
 // It returns Transcription instance or error
-func (api *Client) GetRecordingTranscription(id string, transcriptionID string) (*Transcription, error) {
-	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(recordingsPath), id, transcriptionsPath, transcriptionID), &Transcription{})
+func (api *Client) GetRecordingTranscription(recordingID string, transcriptionID string) (*Transcription, error) {
+	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(recordingsPath), recordingID, transcriptionsPath, transcriptionID), &Transcription{})
 	if err != nil {
 		return nil, err
 	}

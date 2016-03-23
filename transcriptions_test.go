@@ -46,12 +46,6 @@ func TestCreateRecordingTranscription(t *testing.T) {
 		return
 	}
 	expect(t, id, "456")
-	id, err = api.CreateRecordingTranscription("123", map[string]interface{}{})
-	if err != nil {
-		t.Error("Failed call of CreateRecordingTranscription()")
-		return
-	}
-	expect(t, id, "456")
 }
 
 func TestCreateRecordingTranscriptionFail(t *testing.T) {
@@ -61,7 +55,7 @@ func TestCreateRecordingTranscriptionFail(t *testing.T) {
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreateRecordingTranscription("123", map[string]interface{}{"name": "transcription"})
+		return api.CreateRecordingTranscription("123")
 	})
 }
 
