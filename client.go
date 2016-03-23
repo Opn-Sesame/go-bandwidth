@@ -104,14 +104,18 @@ func (c *Client) checkResponse(response *http.Response, responseBody interface{}
 func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
 	request, err := c.createRequest(method, path)
 	var responseBody interface{}
+	treatDataAsQuery := false
 	if err != nil {
 		return nil, nil, err
 	}
 	if len(data) > 0 {
 		responseBody = data[0]
 	}
+	if len(data) > 2 {
+		treatDataAsQuery = data[2].(bool)
+	}
 	if len(data) > 1 {
-		if method == "GET" {
+		if method == "GET" || treatDataAsQuery{
 			var item map[string]string
 			if data[1] == nil {
 				item = make(map[string]string)

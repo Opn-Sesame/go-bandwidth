@@ -3,7 +3,6 @@ package bandwidth
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 )
 
 // AvailableNumberType is allowed number types
@@ -24,13 +23,26 @@ type AvailableNumber struct {
 	Number         string  `json:"number"`
 	NationalNumber string  `json:"nationalNumber"`
 	City           string  `json:"city"`
+	LATA           string  `json:"lata"`
 	RateCenter     string  `json:"rateCenter"`
 	State          string  `json:"state"`
 	Price          float64 `json:"price,string"`
 }
 
+// GetAvailableNumberQuery is  query parameters of GetAvailableNumbers() and GetAndOrderAvailableNumbers()
+type GetAvailableNumberQuery struct {
+	City               string
+	State              string
+	Zip                string
+	AreaCode           string
+	LocalNumber        string
+	InLocalCallingArea bool
+	Quantity           int
+	Pattern            string
+}
+
 // GetAvailableNumbers looks for available numbers
-func (api *Client) GetAvailableNumbers(numberType AvailableNumberType, query map[string]string) ([]*AvailableNumber, error) {
+func (api *Client) GetAvailableNumbers(numberType AvailableNumberType, query *GetAvailableNumberQuery) ([]*AvailableNumber, error) {
 	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", availableNumbersPath, numberType), &[]*AvailableNumber{}, query)
 	if err != nil {
 		return nil, err
@@ -48,13 +60,9 @@ type OrderedNumber struct {
 }
 
 // GetAndOrderAvailableNumbers looks for available numbers and orders them
-func (api *Client) GetAndOrderAvailableNumbers(numberType AvailableNumberType, query map[string]string) ([]*OrderedNumber, error) {
-	q := make(url.Values)
-	for key, value := range query {
-		q[key] = []string{value}
-	}
-	path := fmt.Sprintf("%s/%s?%s", availableNumbersPath, numberType, q.Encode())
-	result, _, err := api.makeRequest(http.MethodPost, path, &[]*OrderedNumber{}, nil)
+func (api *Client) GetAndOrderAvailableNumbers(numberType AvailableNumberType, query *GetAvailableNumberQuery) ([]*OrderedNumber, error) {
+	path := fmt.Sprintf("%s/%s", availableNumbersPath, numberType)
+	result, _, err := api.makeRequest(http.MethodPost, path, &[]*OrderedNumber{}, query, true)
 	if err != nil {
 		return nil, err
 	}

@@ -31,9 +31,9 @@ func TestGetAvailableNumbers(t *testing.T) {
 			"price": "0.60"
 		}]`}})
 	defer server.Close()
-	result, err := api.GetAvailableNumbers(AvailableNumberTypeLocal, map[string]string{
-		"state": "NC",
-		"city": "Cary"})
+	result, err := api.GetAvailableNumbers(AvailableNumberTypeLocal, &GetAvailableNumberQuery{
+		State: "NC",
+		City:  "Cary"})
 	if err != nil {
 		t.Errorf("Failed call of GetAvailableNumbers(): %s", err.Error())
 		return
@@ -43,13 +43,15 @@ func TestGetAvailableNumbers(t *testing.T) {
 
 func TestGetAvailableNumbersFail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: "/v1/availableNumbers/local?city=Cary&state=NC",
-		Method:       http.MethodGet,
+		PathAndQuery:     "/v1/availableNumbers/local?city=Cary&state=NC",
+		Method:           http.MethodGet,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	shouldFail(t, func()(interface{}, error){ return api.GetAvailableNumbers(AvailableNumberTypeLocal, map[string]string{
-		"state": "NC",
-		"city": "Cary"})})
+	shouldFail(t, func() (interface{}, error) {
+		return api.GetAvailableNumbers(AvailableNumberTypeLocal, &GetAvailableNumberQuery{
+			State: "NC",
+			City:  "Cary"})
+	})
 }
 
 func TestGetAndOrderAvailableNumbers(t *testing.T) {
@@ -71,9 +73,9 @@ func TestGetAndOrderAvailableNumbers(t *testing.T) {
 			}
 		]`}})
 	defer server.Close()
-	result, err := api.GetAndOrderAvailableNumbers(AvailableNumberTypeTollFree, map[string]string{
-		"state": "NC",
-		"city": "Cary"})
+	result, err := api.GetAndOrderAvailableNumbers(AvailableNumberTypeTollFree, &GetAvailableNumberQuery{
+		State: "NC",
+		City:  "Cary"})
 	if err != nil {
 		t.Errorf("Failed call of GetAndOrderAvailableNumbers(): %s", err.Error())
 		return
@@ -85,12 +87,13 @@ func TestGetAndOrderAvailableNumbers(t *testing.T) {
 
 func TestGetAndOrderAvailableNumbersFail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: "/v1/availableNumbers/tollFree?city=Cary&state=NC",
-		Method:       http.MethodPost,
+		PathAndQuery:     "/v1/availableNumbers/tollFree?city=Cary&state=NC",
+		Method:           http.MethodPost,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	shouldFail(t, func()(interface{}, error){ return api.GetAndOrderAvailableNumbers(AvailableNumberTypeTollFree, map[string]string{
-		"state": "NC",
-		"city": "Cary"})})
+	shouldFail(t, func() (interface{}, error) {
+		return api.GetAndOrderAvailableNumbers(AvailableNumberTypeTollFree, &GetAvailableNumberQuery{
+			State: "NC",
+			City:  "Cary"})
+	})
 }
-
