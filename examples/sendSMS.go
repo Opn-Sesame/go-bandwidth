@@ -10,7 +10,7 @@ func main5() {
 	fromNumber := os.Args[1]
 	toNumber := os.Args[2]
 	text := os.Args[3]
-	id, err := api.SendMessageTo(fromNumber, toNumber, text)
+	id, err := api.CreateMessage(&bandwidth.CreateMessageData{From: fromNumber, To: toNumber, Text: text})
 	if err != nil {
 		fmt.Printf("Error: %s", err.Error())
 		return

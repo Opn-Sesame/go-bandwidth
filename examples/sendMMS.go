@@ -30,9 +30,11 @@ func main4() {
 		fmt.Printf("Error on uploading file: %s", err.Error())
 		return
 	}
-	id, err := api.SendMessageTo(fromNumber, toNumber, text,
-		map[string]interface{}{"media": []string{
-			fmt.Sprintf("https://api.catapult.inetwork.com/v1/users/%s/media/%s", os.Getenv("CATAPULT_USER_ID"), mediaName)}})
+	id, err := api.CreateMessage(&bandwidth.CreateMessageData{
+		From: fromNumber,
+		To: toNumber,
+		Text: text,
+		Media: []string{fmt.Sprintf("https://api.catapult.inetwork.com/v1/users/%s/media/%s", os.Getenv("CATAPULT_USER_ID"), mediaName)}})
 	if err != nil {
 		fmt.Printf("Error: %s", err.Error())
 		return
