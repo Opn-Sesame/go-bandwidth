@@ -48,7 +48,7 @@ func TestGetApplicationsWithQuery(t *testing.T) {
 			}
 		]`}})
 	defer server.Close()
-	result, err := api.GetApplications(&GetApplicationQuery{Size: 2})
+	result, err := api.GetApplications(&GetApplicationsQuery{Size: 2})
 	if err != nil {
 		t.Errorf("Failed call of GetApplications() %s", err.Error())
 		return

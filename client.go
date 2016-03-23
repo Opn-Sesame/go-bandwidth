@@ -136,7 +136,7 @@ func (c *Client) makeRequest(method, path string, data ...interface{}) (interfac
 								//ignore fields with default values
 								continue
 							}
-							item[strings.ToLower(string(fieldName[0])) + fieldName[1:]] = fmt.Sprintf("%v", fieldValue)
+							item[strings.Replace(strings.ToLower(string(fieldName[0])) + fieldName[1:], "ID", "Id", -1)] = fmt.Sprintf("%v", fieldValue)
 						}
 					}
 				}

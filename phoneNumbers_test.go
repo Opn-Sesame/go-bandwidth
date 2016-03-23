@@ -25,6 +25,26 @@ func TestGetPhoneNumbers(t *testing.T) {
 	expect(t, len(result), 2)
 }
 
+func TestGetPhoneNumbersWithQuery(t *testing.T) {
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery: "/v1/users/userId/phoneNumbers?applicationId=123",
+		Method:       http.MethodGet,
+		ContentToSend: `[{
+			"id": "{phoneNumberId1}",
+			"number": "phoneNumber1"
+		}, {
+			"id": "{phoneNumberId2}",
+			"number": "phoneNumber2"
+		}]`}})
+	defer server.Close()
+	result, err := api.GetPhoneNumbers(&GetPhoneNumbersQuery{ApplicationID: "123"})
+	if err != nil {
+		t.Error("Failed call of GetPhoneNumbers()")
+		return
+	}
+	expect(t, len(result), 2)
+}
+
 func TestGetPhoneNumbersFail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/phoneNumbers",
@@ -41,7 +61,7 @@ func TestCreatePhoneNumber(t *testing.T) {
 		EstimatedContent: `{"number":"phoneNumber"}`,
 		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/phoneNumbers/123"}}})
 	defer server.Close()
-	id, err := api.CreatePhoneNumber(map[string]interface{}{"number": "phoneNumber"})
+	id, err := api.CreatePhoneNumber(&CreatePhoneNumberData{Number: "phoneNumber"})
 	if err != nil {
 		t.Error("Failed call of CreatePhoneNumber()")
 		return
@@ -56,7 +76,7 @@ func TestCreatePhoneNumberFail(t *testing.T) {
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreatePhoneNumber(map[string]interface{}{"number": "phoneNumber"})
+		return api.CreatePhoneNumber(&CreatePhoneNumberData{Number: "phoneNumber"})
 	})
 }
 
@@ -93,7 +113,7 @@ func TestUpdatePhoneNumber(t *testing.T) {
 		EstimatedContent: `{"applicationId":"appId"}`,
 		Method:       http.MethodPost}})
 	defer server.Close()
-	err := api.UpdatePhoneNumber("123", map[string]interface{}{"applicationId": "appId"})
+	err := api.UpdatePhoneNumber("123", &UpdatePhoneNumberData{ApplicationID: "appId"})
 	if err != nil {
 		t.Error("Failed call of UpdatePhoneNumber()")
 		return

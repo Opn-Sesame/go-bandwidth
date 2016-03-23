@@ -21,16 +21,16 @@ type Application struct {
 	AutoAnswer                        bool   `json:"autoAnswer,omitempty"`
 }
 
-// GetApplicationQuery is optional parameters of GetApplications()
-type GetApplicationQuery struct {
+// GetApplicationsQuery is optional parameters of GetApplications()
+type GetApplicationsQuery struct {
 	Page int
 	Size int
 }
 
 // GetApplications returns list of user's applications
 // It returns list of Application instances or error
-func (api *Client) GetApplications(query ...*GetApplicationQuery) ([]*Application, error) {
-	var options *GetApplicationQuery
+func (api *Client) GetApplications(query ...*GetApplicationsQuery) ([]*Application, error) {
+	var options *GetApplicationsQuery
 	if len(query) > 0 {
 		options = query[0]
 	}
