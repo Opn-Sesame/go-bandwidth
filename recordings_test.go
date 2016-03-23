@@ -25,6 +25,26 @@ func TestGetRecordings(t *testing.T) {
 	expect(t, len(result), 2)
 }
 
+func TestGetRecordingsWithQuery(t *testing.T) {
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery: "/v1/users/userId/recordings?page=2",
+		Method:       http.MethodGet,
+		ContentToSend: `[{
+			"id": "{recordingId1}",
+			"media": "recording1"
+		}, {
+			"id": "{recordingId2}",
+			"media": "recording2"
+		}]`}})
+	defer server.Close()
+	result, err := api.GetRecordings(&GetRecordingsQuery{Page: 2})
+	if err != nil {
+		t.Error("Failed call of GetRecordings()")
+		return
+	}
+	expect(t, len(result), 2)
+}
+
 func TestGetRecordingsFail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/recordings",

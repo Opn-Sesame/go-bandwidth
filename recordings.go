@@ -17,10 +17,16 @@ type Recording struct {
 	State     string `json:"state"`
 }
 
+// GetRecordingsQuery is optional parameters of GetRecordings()
+type GetRecordingsQuery struct {
+	Page int
+	Size int
+}
+
 // GetRecordings returns  a list of the calls recordings
 // It returns list of Recording instances or error
-func (api *Client) GetRecordings(query ...map[string]string) ([]*Recording, error) {
-	var options map[string]string
+func (api *Client) GetRecordings(query ...*GetRecordingsQuery) ([]*Recording, error) {
+	var options *GetRecordingsQuery
 	if len(query) > 0 {
 		options = query[0]
 	}
