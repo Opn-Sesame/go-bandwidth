@@ -80,6 +80,32 @@ func TestCreateMessageFail(t *testing.T) {
 	})
 }
 
+func TestCreateMessages(t *testing.T) {
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:     "/v1/users/userId/messages",
+		Method:           http.MethodPost,
+		EstimatedContent: `[{"from":"fromNumber","to":"toNumber","text":"text"}]`,
+		ContentToSend: `[{"result":"accepted","location":"http://host/123"}]`}})
+	defer server.Close()
+	statuses, err := api.CreateMessages(&CreateMessageData{From: "fromNumber", To: "toNumber", Text: "text"})
+	if err != nil {
+		t.Error("Failed call of CreateMessages()")
+		return
+	}
+	expect(t, statuses[0].ID, "123")
+}
+
+func TestCreateMessagesFail(t *testing.T) {
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:     "/v1/users/userId/messages",
+		Method:           http.MethodPost,
+		StatusCodeToSend: http.StatusBadRequest}})
+	defer server.Close()
+	shouldFail(t, func() (interface{}, error) {
+		return api.CreateMessages(&CreateMessageData{From: "fromNumber", To: "toNumber", Text: "text"})
+	})
+}
+
 func TestGetMessage(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery: "/v1/users/userId/messages/123",

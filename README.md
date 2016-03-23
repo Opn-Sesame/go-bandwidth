@@ -51,30 +51,28 @@ Read [Catapult Api documentation](http://ap.bandwidth.com/) for more details
 List all calls from special number
 
 ```go
-  list, _ := api.GetCalls(map[string]string{"from": "+19195551212"})
+  list, _ := api.GetCalls(&bandwidth.GetCallsQuery{From: "+19195551212"})
 ```
 
 List all received messages
 
 ```go
-  list, _ := api.GetMessages(map[string]string{"state": "received"})
+  list, _ := api.GetMessages(&bandwidth.GetMessagesQuery{State: "received"})
 ```
 
 Send SMS
 
 ```go
-  api.SendMessageTo("+19195551212", "+191955512142", "Test")
-  // or
-  api.CreateMessage(map[string]interface{}{"from": "+19195551212", "to":"+191955512142", "text":"Test"})
+  messageId, _ := api.CreateMessage(&bandwidth.CreateMessageData{From: "+19195551212", To: "+191955512142", Text:"Test"})
 ```
 
 
 Send some SMSes
 
 ```go
-  api.CreateMessage([]map[string]interface{}{
-	  map[string]interface{}{"from": "+19195551212", "to":"+191955512142", "text":"Test1"}, 
-	  map[string]interface{}{"from": "+19195551212", "to":"+191955512143", "text":"Test2"}})
+  statuses, error := api.CreateMessages(
+	  &bandwidth.CreateMessageData{From: "+19195551212", To: "+191955512141", Text:"Test1"}, 
+	  &bandwidth.CreateMessageData{From: "+19195551212", To: "+191955512142", Text:"Test2"})
 ```
 
 Upload file
@@ -86,9 +84,7 @@ Upload file
 Make a call
 
 ```go
-  api.CallTo("+19195551212", "+191955512142")
-  // or
-  api.CreateCall(map[string]interface{}{"from": "+19195551212",  "to": "+191955512142"})
+  api.CreateCall(&bandwidth.CreateCallData{From: "+19195551212",  To: "+191955512142"})
 ```
 
 Reject incoming call
@@ -99,31 +95,31 @@ Reject incoming call
 
 Create a gather
 ```go
-  api.CreateGather(callId, map[string]interface{}{"maxDigits": 3, "interDigitTimeout": 5, "prompt": map[string]string{"sentence": "Please enter 3 digits"}})
+  api.CreateGather(callId, &bandwidth.CreateGatherData{MaxDigits: 3, InterDigitTimeout: 5, Prompt: &bandwidth.GatherPromptData{Sentence: "Please enter 3 digits"}})
 ```
 
 Start a conference
 ```go
-  api.CreateConference(map[string]interface{}{"from": "+19195551212"})
+  api.CreateConference(&bandwidth.CreateConferenceData{From: "+19195551212"})
 ```
 
 Add a member to the conference
 
 ```go
-  api.CreateConferenceMember(conferenceId, map[string]interface{}{"callId": "id_of_call_to_add_to_this_conference", "joinTone": true, "leavingTone": true})
+  api.CreateConferenceMember(conferenceId, &bandwidth.CreateConferenceMemberData{CallId: "id_of_call_to_add_to_this_conference", JoinTone: true, LeavingTone: true})
 ```
 
 
 Connect 2 calls to a bridge
 
 ```go
-  api.CreateBridge(map[string]interface{}{"callIds": []string{callId1, callId2}})
+  api.CreateBridge(&bandwidth.BridgeData{CallIDs: []string{callId1, callId2}})
 ```
 
 Search available local numbers to buy
 
 ```go
-  list, _ := api.GetAvailableNumbers(bandwidth.AvailableNumberTypeLocal, map[string]string{"city": "Cary", "state": "NC", "quantity": "3"})
+  list, _ := api.GetAvailableNumbers(bandwidth.AvailableNumberTypeLocal, &bandwidth.GetAvailableNumberQuery{City: "Cary", State: "NC", Quantity: 3})
 ```
 Get CNAM info for a number
 
@@ -134,9 +130,7 @@ Get CNAM info for a number
 Buy a phone number
 
 ```go
-  api.ReservePhoneNumber("+19195551212")
-  // or
-  api.CreatePhoneNumber(map[string]interface{}{"number": "+19195551212"})
+  api.CreatePhoneNumber(&bandwidth.CreatePhoneNumberData{Number: "+19195551212"})
 ```
 
 List recordings

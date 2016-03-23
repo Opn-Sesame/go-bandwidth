@@ -56,6 +56,13 @@ type GetMessagesQuery struct {
 	SortOrder     string
 }
 
+// CreateMessageResult stores status of sent message (in batch mode)
+type CreateMessageResult struct {
+	Result   string `json:"result,omitempty"`
+	Location string `json:"location,omitempty"`
+	ID       string `json:"-"`
+}
+
 // GetMessages returns list of all messages
 // It returns list of Message instances or error
 func (api *Client) GetMessages(query ...*GetMessagesQuery) ([]*Message, error) {
@@ -78,6 +85,20 @@ func (api *Client) CreateMessage(data *CreateMessageData) (string, error) {
 		return "", err
 	}
 	return getIDFromLocationHeader(headers), nil
+}
+
+// CreateMessages sends some messages (SMS/MMS)
+// It statuses of created messages or error
+func (api *Client) CreateMessages(data ...*CreateMessageData) ([]*CreateMessageResult, error) {
+	result, _, err := api.makeRequest(http.MethodPost, api.concatUserPath(messagesPath), &[]*CreateMessageResult{}, data)
+	if err != nil {
+		return nil, err
+	}
+	list := *(result.(*[]*CreateMessageResult))
+	for _, r := range list {
+		r.ID = getIDFromLocation(r.Location)
+	}
+	return list, nil
 }
 
 // GetMessage returns a single message
