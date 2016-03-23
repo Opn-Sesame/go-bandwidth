@@ -1,8 +1,5 @@
 package bandwidth
 
-import (
-	"strconv"
-)
 
 func mergeMaps(src, dst map[string]interface{}){
 	if dst == nil {
@@ -13,58 +10,32 @@ func mergeMaps(src, dst map[string]interface{}){
 	}
 }
 
-// CallTo creates call to given phone number
-// It returns ID of created call or error
-// example: api.CallTo("+1-from", "+1-to")
-func (api *Client) CallTo(fromNumber string, toNumber string, options ...map[string]interface{}) (string, error){
-	data := map[string]interface{}{
-		"from": fromNumber,
-		"to": toNumber }
-	if len(options) > 0 {
-		mergeMaps(data, options[0])
-	}
-	return api.CreateCall(data)
-}
-
 // AnswerIncomingCall  answers an incoming call
 // It returns error object
 // example: api.CalAnswerIncomingCall("callId")
 func (api *Client) AnswerIncomingCall(id string) error{
-	return api.UpdateCall(id,  map[string]interface{}{"state": "active"})
+	return api.UpdateCall(id,  &UpdateCallData{State: "active"})
 }
 
 // RejectIncomingCall  answers an incoming call
 // It returns error object
 // example: api.RejectIncomingCall("callId")
 func (api *Client) RejectIncomingCall(id string) error{
-	return api.UpdateCall(id,  map[string]interface{}{"state": "rejected"})
+	return api.UpdateCall(id,  &UpdateCallData{State:  "rejected"})
 }
 
 // HangUpCall  hangs up the call
 // It returns error object
 // example: api.HangUpCall("callId")
 func (api *Client) HangUpCall(id string) error{
-	return api.UpdateCall(id,  map[string]interface{}{"state": "completed"})
+	return api.UpdateCall(id,  &UpdateCallData{State:  "completed"})
 }
 
 // SetCallRecodingEnabled  hangs up the call
 // It returns error object
 // example: api.SetCallRecodingEnabled("callId", true) // enable recording
 func (api *Client) SetCallRecodingEnabled(id string, enabled bool) error{
-	return api.UpdateCall(id,  map[string]interface{}{"recordingEnabled": strconv.FormatBool(enabled)})
-}
-
-// TransferCallTo  transfers call to another number
-// It returns error object
-// example: api.TransferCallTo("callId", "+1-to-number")
-func (api *Client) TransferCallTo(id string, transferToNumber string, options ...map[string]interface{}) error{
-	data := map[string]interface{}{
-		"state": "transferring",
-		"transferTo": transferToNumber }
-	if len(options) > 0 {
-		mergeMaps(data, options[0])
-	}
-	return api.UpdateCall(id,  data)
+	return api.UpdateCall(id,  &UpdateCallData{RecordingEnabled: enabled})
 }
 
 
@@ -72,12 +43,12 @@ func (api *Client) TransferCallTo(id string, transferToNumber string, options ..
 // It returns error object
 // example: api.StopGather("callId")
 func (api *Client) StopGather(id string, gatherID string) error{
-	return api.UpdateGather(id, gatherID, map[string]interface{}{"state": "completed"})
+	return api.UpdateGather(id, gatherID, &UpdateGatherData{State: "completed"})
 }
 
 // SendDTMFCharactersToCall sends some dtmf characters to call
 // It returns error object
 // example: api.SendDTMFCharactersToCall("callId", "1")
 func (api *Client) SendDTMFCharactersToCall(id string, dtmfOut string) error{
-	return api.SendDTMFToCall(id,  map[string]interface{}{"dtmfOut": dtmfOut})
+	return api.SendDTMFToCall(id,  &SendDTMFToCallData{DTMFOut: dtmfOut})
 }
