@@ -41,7 +41,7 @@ func TestCreateDomain(t *testing.T) {
 		EstimatedContent: `{"name":"domain"}`,
 		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/domains/123"}}})
 	defer server.Close()
-	id, err := api.CreateDomain(map[string]interface{}{"name": "domain"})
+	id, err := api.CreateDomain(&CreateDomainData{Name: "domain"})
 	if err != nil {
 		t.Error("Failed call of CreateDomain()")
 		return
@@ -56,7 +56,7 @@ func TestCreateDomainFail(t *testing.T) {
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreateDomain(map[string]interface{}{"name": "domain"})
+		return api.CreateDomain(&CreateDomainData{Name: "domain"})
 	})
 }
 

@@ -41,7 +41,7 @@ func TestCreateDomainEndpoint(t *testing.T) {
 		EstimatedContent: `{"name":"endpoint"}`,
 		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/domain/123/endpoints/456"}}})
 	defer server.Close()
-	id, err := api.CreateDomainEndpoint("123", map[string]interface{}{"name": "endpoint"})
+	id, err := api.CreateDomainEndpoint("123", &DomainEndpointData{Name: "endpoint"})
 	if err != nil {
 		t.Error("Failed call of CreateDomainEndpoint()")
 		return
@@ -56,7 +56,7 @@ func TestCreateDomainEndpointFail(t *testing.T) {
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreateDomainEndpoint("123", map[string]interface{}{"name": "endpoint"})
+		return api.CreateDomainEndpoint("123", &DomainEndpointData{Name: "endpoint"})
 	})
 }
 
@@ -66,7 +66,7 @@ func TestUpdateDomainEndpoint(t *testing.T) {
 		EstimatedContent: `{"name":"endpoint1"}`,
 		Method:       http.MethodPost}})
 	defer server.Close()
-	err := api.UpdateDomainEndpoint("123", "456", map[string]interface{}{"name": "endpoint1"})
+	err := api.UpdateDomainEndpoint("123", "456", &DomainEndpointData{Name: "endpoint1"})
 	if err != nil {
 		t.Error("Failed call of UpdateDomainEndpoint()")
 		return

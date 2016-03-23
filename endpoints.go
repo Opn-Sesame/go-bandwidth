@@ -9,13 +9,32 @@ const endpointsPath = "endpoints"
 
 // DomainEndpoint struct
 type DomainEndpoint struct {
-	Name          string            `json:"name"`
-	Description   string            `json:"description"`
-	DomainID      string            `json:"domainId"`
-	ApplicationID string            `json:"applicationId"`
-	Enabled       bool              `json:"enabled,string"`
-	SipURI        string            `json:"sipUri"`
-	Credentials   map[string]string `json:"credentials"`
+	ID            string                     `json:"id"`
+	Name          string                     `json:"name"`
+	Description   string                     `json:"description"`
+	DomainID      string                     `json:"domainId"`
+	ApplicationID string                     `json:"applicationId"`
+	Enabled       bool                       `json:"enabled,string"`
+	SipURI        string                     `json:"sipUri"`
+	Credentials   *DomainEndpointCredentials `json:"credentials"`
+}
+
+// DomainEndpointData struct
+type DomainEndpointData struct {
+	Name          string                     `json:"name,omitempty"`
+	Description   string                     `json:"description,omitempty"`
+	DomainID      string                     `json:"domainId,omitempty"`
+	ApplicationID string                     `json:"applicationId,omitempty"`
+	Enabled       bool                       `json:"enabled,string,omitempty"`
+	SipURI        string                     `json:"sipUri,omitempty"`
+	Credentials   *DomainEndpointCredentials `json:"credentials,omitempty"`
+}
+
+// DomainEndpointCredentials struct
+type DomainEndpointCredentials struct {
+	Password string `json:"password,omitempty"`
+	UserName string `json:"username,omitempty"`
+	Realm    string `json:"realm,omitempty"`
 }
 
 // GetDomainEndpoints returns list of all endpoints for a domain
@@ -30,7 +49,7 @@ func (api *Client) GetDomainEndpoints(id string) ([]*DomainEndpoint, error) {
 
 // CreateDomainEndpoint creates a new endpoint for a domain
 // It returns ID of created endpoint or error
-func (api *Client) CreateDomainEndpoint(id string, data map[string]interface{}) (string, error) {
+func (api *Client) CreateDomainEndpoint(id string, data *DomainEndpointData) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath), nil, data)
 	if err != nil {
 		return "", err
@@ -57,7 +76,7 @@ func (api *Client) DeleteDomainEndpoint(id string, endpointID string) error {
 
 // UpdateDomainEndpoint removes a endpoint from domain
 // It returns error object
-func (api *Client) UpdateDomainEndpoint(id string, endpointID string, data map[string]interface{}) error {
-	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath, endpointID), nil, data)
+func (api *Client) UpdateDomainEndpoint(id string, endpointID string, changedData *DomainEndpointData) error {
+	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath, endpointID), nil, changedData)
 	return err
 }

@@ -24,9 +24,15 @@ func (api *Client) GetDomains() ([]*Domain, error) {
 	return *(result.(*[]*Domain)), nil
 }
 
+// CreateDomainData struct
+type CreateDomainData struct {
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
 // CreateDomain creates a new domain
 // It returns ID of created domain or error
-func (api *Client) CreateDomain(data map[string]interface{}) (string, error) {
+func (api *Client) CreateDomain(data *CreateDomainData) (string, error) {
 	_, headers, err := api.makeRequest(http.MethodPost, api.concatUserPath(domainsPath), nil, data)
 	if err != nil {
 		return "", err
