@@ -25,10 +25,17 @@ type PhoneNumber struct {
 
 // CreatePhoneNumberData struct
 type CreatePhoneNumberData struct {
-	Number         string `json:"number,omitempty"`
-	Name           string `json:"name,omitempty"`
-	ApplicationID  string `json:"applicationId,omitempty"`
-	FallbackNumber string `json:"fallbackNumber,omitempty"`
+	Number         string               `json:"number,omitempty"`
+	Name           string               `json:"name,omitempty"`
+	ApplicationID  string               `json:"applicationId,omitempty"`
+	FallbackNumber string               `json:"fallbackNumber,omitempty"`
+	Provider       *PhoneNumberProvider `json:"provider,omitempty"`
+}
+
+// PhoneNumberProvider struct
+type PhoneNumberProvider struct {
+	Name       string                 `json:"providerName,omitempty"`
+	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
 // UpdatePhoneNumberData struct
