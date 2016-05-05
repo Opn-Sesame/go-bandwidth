@@ -37,6 +37,12 @@ type DomainEndpointCredentials struct {
 	Realm    string `json:"realm,omitempty"`
 }
 
+// DomainEndpointToken struct
+type DomainEndpointToken struct {
+	Token   string `json:"token"`
+	Expires int    `json:"expires"`
+}
+
 // GetDomainEndpoints returns list of all endpoints for a domain
 // It returns list of DomainEndpoint instances or error
 func (api *Client) GetDomainEndpoints(id string) ([]*DomainEndpoint, error) {
@@ -79,4 +85,14 @@ func (api *Client) DeleteDomainEndpoint(id string, endpointID string) error {
 func (api *Client) UpdateDomainEndpoint(id string, endpointID string, changedData *DomainEndpointData) error {
 	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath, endpointID), nil, changedData)
 	return err
+}
+
+// CreateDomainEndpointToken creates a new auth token for a domain's enpoint
+// It returns token or error
+func (api *Client) CreateDomainEndpointToken(id, endpointID string) (*DomainEndpointToken, error) {
+	result, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s/%s/tokens", api.concatUserPath(domainsPath), id, endpointsPath, endpointID), &DomainEndpointToken{}, nil)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DomainEndpointToken), nil
 }
