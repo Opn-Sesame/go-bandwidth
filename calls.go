@@ -111,9 +111,9 @@ type UpdateCallData struct {
 
 // UpdateCall manage an active phone call. E.g. Answer an incoming call, reject an incoming call, turn on / off recording, transfer, hang up
 // It returns error object
-func (api *Client) UpdateCall(id string, changedData *UpdateCallData) error {
-	_, _, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(callsPath), id), nil, changedData)
-	return err
+func (api *Client) UpdateCall(id string, changedData *UpdateCallData) (string, error) {
+	_, headers, err := api.makeRequest(http.MethodPost, fmt.Sprintf("%s/%s", api.concatUserPath(callsPath), id), nil, changedData)
+	return getIDFromLocationHeader(headers), err
 }
 
 // PlayAudioToCall plays an audio or speak a sentence in a call

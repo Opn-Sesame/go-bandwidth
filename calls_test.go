@@ -114,11 +114,26 @@ func TestUpdateCall(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"state":"completed"}`}})
 	defer server.Close()
-	err := api.UpdateCall("123", &UpdateCallData{State: "completed"})
+	_, err := api.UpdateCall("123", &UpdateCallData{State: "completed"})
 	if err != nil {
 		t.Error("Failed call of UpdateCall()")
 		return
 	}
+}
+
+func TestUpdateCallWithLocationHeader(t *testing.T) {
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:     "/v1/users/userId/calls/123",
+		Method:           http.MethodPost,
+		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/calls/456"},
+		EstimatedContent: `{"state":"completed"}`}})
+	defer server.Close()
+	id, err := api.UpdateCall("123", &UpdateCallData{State: "completed"})
+	if err != nil {
+		t.Error("Failed call of UpdateCall()")
+		return
+	}
+	expect(t, id, "456")
 }
 
 func TestPlayAudioToCall(t *testing.T) {
