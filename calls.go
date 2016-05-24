@@ -107,6 +107,7 @@ type UpdateCallData struct {
 	TranscriptionEnabled bool           `json:"transcriptionEnabled,string,omitempty"`
 	CallbackURL          string         `json:"callbackUrl,omitempty"`
 	WhisperAudio         *PlayAudioData `json:"whisperAudio,omitempty"`
+	Tag                  string         `json:"tag,omitempty"`
 }
 
 // UpdateCall manage an active phone call. E.g. Answer an incoming call, reject an incoming call, turn on / off recording, transfer, hang up
