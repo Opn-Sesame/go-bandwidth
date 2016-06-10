@@ -103,6 +103,7 @@ type UpdateCallData struct {
 	TransferCallerID     string         `json:"transferCallerId,omitempty"`
 	TransferTo           string         `json:"transferTo,omitempty"`
 	RecordingEnabled     bool           `json:"recordingEnabled,string,omitempty"`
+	RecordingFileFormat  string         `json:"recordingFileFormat,omitempty"`
 	State                string         `json:"state,omitempty"`
 	TranscriptionEnabled bool           `json:"transcriptionEnabled,string,omitempty"`
 	CallbackURL          string         `json:"callbackUrl,omitempty"`
