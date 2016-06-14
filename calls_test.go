@@ -149,6 +149,19 @@ func TestPlayAudioToCall(t *testing.T) {
 	}
 }
 
+func TestPlayAudioToCallWithMap(t *testing.T) {
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:     "/v1/users/userId/calls/123/audio",
+		Method:           http.MethodPost,
+		EstimatedContent: `{"fileUrl":"file.mp3"}`}})
+	defer server.Close()
+	err := api.PlayAudioToCallWithMap("123", map[string]interface{}{"fileUrl": "file.mp3"})
+	if err != nil {
+		t.Error("Failed call of PlayAudioToCall()")
+		return
+	}
+}
+
 func TestSendDTMFToCall(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/calls/123/dtmf",
