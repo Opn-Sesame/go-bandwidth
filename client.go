@@ -18,6 +18,7 @@ type Client struct {
 	UserID, APIToken, APISecret string
 	APIVersion                  string
 	APIEndPoint                 string
+	HTTPClient                  *http.Client
 }
 
 // New creates new instances of api
@@ -36,7 +37,7 @@ func New(userID, apiToken, apiSecret string, other ...string) (*Client, error) {
 	if l > 0 {
 		apiVersion = other[0]
 	}
-	client := &Client{userID, apiToken, apiSecret, apiVersion, apiEndPoint}
+	client := &Client{userID, apiToken, apiSecret, apiVersion, apiEndPoint, http.DefaultClient}
 	return client, nil
 }
 
@@ -155,8 +156,7 @@ func (c *Client) makeRequest(method, path string, data ...interface{}) (interfac
 			request.Body = nopCloser{bytes.NewReader(rawJSON)}
 		}
 	}
-	client := &http.Client{}
-	response, err := client.Do(request)
+	response, err := c.HTTPClient.Do(request)
 	if err != nil {
 		return nil, nil, err
 	}
