@@ -2,8 +2,15 @@ package xml
 
 import (
 	"encoding/xml"
+	"reflect"
 	"testing"
 )
+
+func expect(t *testing.T, value interface{}, expected interface{}) {
+	if !reflect.DeepEqual(value, expected) {
+		t.Errorf("Expected %v  - Got %v (%T)", expected, value, value)
+	}
+}
 
 func TestToXML(t *testing.T) {
 	response := &Response{}
@@ -55,7 +62,7 @@ func TestVerbs(t *testing.T) {
 		Reject{Reason: "none"},
 		SendMessage{From: "from", To: "to", Text: "text"},
 		SpeakSentence{Sentence: "Hello"},
-		Transfer{TransferTo: "number", SpeakSentence: &bxml.SpeakSentence{Sentence: "Please wait"}},
+		Transfer{TransferTo: "number", SpeakSentence: &SpeakSentence{Sentence: "Please wait"}},
 	}}
 	expect(t, response.ToXML(), `<Response><Gather requestUrl="url"></Gather><Pause duration="10"></Pause><Hangup></Hangup><PlayAudio>url</PlayAudio><Record requestUrl="url"></Record><Redirect requestUrl="url"></Redirect><Reject reason="none"></Reject><SendMessage from="from" to="to">text</SendMessage><SpeakSentence>Hello</SpeakSentence><Transfer transferTo="number"><SpeakSentence>Please wait</SpeakSentence></Transfer></Response>`)
 }
