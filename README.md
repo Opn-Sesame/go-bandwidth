@@ -1,4 +1,4 @@
-Catapult API in Go [![GoDoc](https://godoc.org/bandwidthcom/go-bandwidth?status.svg)](https://godoc.org/github.com/bandwidthcom/go-bandwidth) [![Build Status](https://travis-ci.org/bandwidthcom/go-bandwidth.svg)](https://travis-ci.org/bandwidthcom/go-bandwidth)
+Catapult API in Go [![GoDoc](https://godoc.org/Bandwidth/go-bandwidth?status.svg)](https://godoc.org/github.com/Bandwidth/go-bandwidth) [![Build Status](https://travis-ci.org/Bandwidth/go-bandwidth.svg)](https://travis-ci.org/Bandwidth/go-bandwidth)
 ===============
 
 
@@ -26,7 +26,7 @@ Also you can work with Bandwidth XML using special types.
 ## Install
 
 ```
-     go get github.com/bandwidthcom/go-bandwidth
+     go get github.com/Bandwidth/go-bandwidth
 ```
 
 
@@ -37,7 +37,7 @@ Also you can work with Bandwidth XML using special types.
 * **Set user id, api token and secret**
 
 ```golang
-	import "github.com/bandwidthcom/go-bandwidth"
+	import "github.com/Bandwidth/go-bandwidth"
 	
 	api := bandwidth.New("userId", "apiToken", "apiSecret")
 ```
@@ -142,7 +142,7 @@ List recordings
 Generate Bandwidth XML
 ```go
    import (
-	   "github.com/bandwidthcom/go-bandwidth/xml"
+	   "github.com/Bandwidth/go-bandwidth/xml"
 	   "fmt"
    )
    
