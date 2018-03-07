@@ -12,25 +12,14 @@ func TestNew(t *testing.T) {
 	expect(t, api.APIToken, "apiToken")
 	expect(t, api.APISecret, "apiSecret")
 	expect(t, api.APIEndPoint, "https://api.catapult.inetwork.com")
-	expect(t, api.APIVersion, "v1")
-}
-
-func TestNewWithVersion(t *testing.T) {
-	api, _ := New("userId", "apiToken", "apiSecret", "v0")
-	expect(t, api.UserID, "userId")
-	expect(t, api.APIToken, "apiToken")
-	expect(t, api.APISecret, "apiSecret")
-	expect(t, api.APIEndPoint, "https://api.catapult.inetwork.com")
-	expect(t, api.APIVersion, "v0")
 }
 
 func TestNewWithEndpointAndVersion(t *testing.T) {
-	api, _ := New("userId", "apiToken", "apiSecret", "v0", "endpoint")
+	api, _ := New("userId", "apiToken", "apiSecret", "endpoint")
 	expect(t, api.UserID, "userId")
 	expect(t, api.APIToken, "apiToken")
 	expect(t, api.APISecret, "apiSecret")
 	expect(t, api.APIEndPoint, "endpoint")
-	expect(t, api.APIVersion, "v0")
 }
 
 func TestNewFail(t *testing.T) {
@@ -51,17 +40,17 @@ func TestConcatUserPath(t *testing.T) {
 
 func TestPrepareURL(t *testing.T) {
 	api := getAPI()
-	if api.prepareURL("test") != "https://api.catapult.inetwork.com/v1/test" {
+	if api.prepareURL("test", "v1") != "https://api.catapult.inetwork.com/v1/test" {
 		t.Error("Should return valid url (without slash)")
 	}
-	if api.prepareURL("/test") != "https://api.catapult.inetwork.com/v1/test" {
+	if api.prepareURL("/test", "v1") != "https://api.catapult.inetwork.com/v1/test" {
 		t.Error("Should return valid url (with slash)")
 	}
 }
 
 func TestCreateRequest(t *testing.T) {
 	api := getAPI()
-	req, err := api.createRequest(http.MethodGet, "/test")
+	req, err := api.createRequest(http.MethodGet, "/test", "v1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,11 +63,13 @@ func TestCreateRequest(t *testing.T) {
 
 func TestCreateRequestFail(t *testing.T) {
 	api := getAPI()
-	shouldFail(t, func()(interface{}, error){ return api.createRequest("invalid\n\r\tmethod", "invalid:/\n/ url = ") })
+	shouldFail(t, func() (interface{}, error) {
+		return api.createRequest("invalid\n\r\tmethod", "invalid:/\n/ url = ", "v1")
+	})
 }
 
 func TestCheckResponse(t *testing.T) {
-	type Test struct{
+	type Test struct {
 		Test string `json:"test"`
 	}
 	api := getAPI()
@@ -93,10 +84,9 @@ func TestCheckResponse(t *testing.T) {
 	expect(t, testResult.Test, "test")
 }
 
-
 func TestCheckResponseFail(t *testing.T) {
 	api := getAPI()
-	fail := func(action func()(interface{}, http.Header, error)) error{
+	fail := func(action func() (interface{}, http.Header, error)) error {
 		_, _, err := action()
 		if err == nil {
 			t.Error("Should fail here")
@@ -131,7 +121,7 @@ func TestMakeRequest(t *testing.T) {
 
 func TestMakeRequestFail(t *testing.T) {
 	api := getAPI()
-	shouldFail(t, func()(interface{}, error){
+	shouldFail(t, func() (interface{}, error) {
 		_, _, err := api.makeRequest("invalid\n\r\tmethod", "invalid:/\n/ url = ")
 		return nil, err
 	})
@@ -167,7 +157,7 @@ func TestMakeRequestWithBody(t *testing.T) {
 		EstimatedContent: `{"field1":"value1","field2":"value with space"}`,
 		ContentToSend:    `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodPost, "/test", nil,  map[string]interface{}{
+	result, _, _ := api.makeRequest(http.MethodPost, "/test", nil, map[string]interface{}{
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
@@ -184,10 +174,10 @@ func TestMakeRequestWithEmptyResponse(t *testing.T) {
 }
 
 func TestGetIDFromLocationHeader(t *testing.T) {
-	headers := http.Header {"Location": []string {"http://localhost/123"}}
-	headers = http.Header {"Location": []string {""}}
+	headers := http.Header{"Location": []string{"http://localhost/123"}}
+	headers = http.Header{"Location": []string{""}}
 	expect(t, getIDFromLocationHeader(headers), "")
-	headers = http.Header {}
+	headers = http.Header{}
 	expect(t, getIDFromLocationHeader(headers), "")
 }
 

@@ -40,7 +40,7 @@ func (api *Client) DeleteMediaFile(name string) error {
 // example: api.UploadMediaFile("file.jpg", "/path/ti/file.jpg", "image/jpeg")
 // api.UploadMediaFile("file.bin", readCloserInstance) // using io.ReadCloser instance
 func (api *Client) UploadMediaFile(name string, file interface{}, contentType ...string) error {
-	request, err := api.createRequest(http.MethodPut, fmt.Sprintf("%s/%s", api.concatUserPath(mediaPath), url.QueryEscape(name)))
+	request, err := api.createRequest(http.MethodPut, fmt.Sprintf("%s/%s", api.concatUserPath(mediaPath), url.QueryEscape(name)), "v1")
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (api *Client) UploadMediaFile(name string, file interface{}, contentType ..
 // It returns error io.ReadCloser, cotent type of downloaded file or error
 // example: stream, contentType,  err := api.DownloadMediaFile("file.jpg")
 func (api *Client) DownloadMediaFile(name string) (io.ReadCloser, string, error) {
-	request, err := api.createRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(mediaPath), url.QueryEscape(name)))
+	request, err := api.createRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(mediaPath), url.QueryEscape(name)), "v1")
 	if err != nil {
 		return nil, "", err
 	}

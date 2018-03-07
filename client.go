@@ -16,7 +16,6 @@ import (
 // Client is main API object
 type Client struct {
 	UserID, APIToken, APISecret string
-	APIVersion                  string
 	APIEndPoint                 string
 	HTTPClient                  *http.Client
 }
@@ -25,19 +24,15 @@ type Client struct {
 // It returns Client instance. Use it to make API calls.
 // example: api := bandwidth.New("userId", "apiToken", "apiSecret")
 func New(userID, apiToken, apiSecret string, other ...string) (*Client, error) {
-	apiVersion := "v1"
 	apiEndPoint := "https://api.catapult.inetwork.com"
 	if userID == "" || apiToken == "" || apiSecret == "" {
 		return nil, errors.New("Missing auth data. Please use api := bandwidth.New(\"user-id\", \"api-token\", \"api-secret\")")
 	}
 	l := len(other)
-	if l > 1 {
-		apiEndPoint = other[1]
-	}
 	if l > 0 {
-		apiVersion = other[0]
+		apiEndPoint = other[0]
 	}
-	client := &Client{userID, apiToken, apiSecret, apiVersion, apiEndPoint, http.DefaultClient}
+	client := &Client{userID, apiToken, apiSecret, apiEndPoint, http.DefaultClient}
 	return client, nil
 }
 
@@ -48,15 +43,15 @@ func (c *Client) concatUserPath(path string) string {
 	return fmt.Sprintf("/users/%s%s", c.UserID, path)
 }
 
-func (c *Client) prepareURL(path string) string {
+func (c *Client) prepareURL(path string, version string) string {
 	if path[0] != '/' {
 		path = "/" + path
 	}
-	return fmt.Sprintf("%s/%s%s", c.APIEndPoint, c.APIVersion, path)
+	return fmt.Sprintf("%s/%s%s", c.APIEndPoint, version, path)
 }
 
-func (c *Client) createRequest(method, path string) (*http.Request, error) {
-	request, err := http.NewRequest(method, c.prepareURL(path), nil)
+func (c *Client) createRequest(method, path string, version string) (*http.Request, error) {
+	request, err := http.NewRequest(method, c.prepareURL(path, version), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +97,8 @@ func (c *Client) checkResponse(response *http.Response, responseBody interface{}
 	return nil, nil, errors.New(message.(string))
 }
 
-func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
-	request, err := c.createRequest(method, path)
+func (c *Client) makeRequestInternal(method, path string, version string, data ...interface{}) (interface{}, http.Header, error) {
+	request, err := c.createRequest(method, path, version)
 	var responseBody interface{}
 	treatDataAsQuery := false
 	if err != nil {
@@ -161,6 +156,14 @@ func (c *Client) makeRequest(method, path string, data ...interface{}) (interfac
 		return nil, nil, err
 	}
 	return c.checkResponse(response, responseBody)
+}
+
+func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
+	return c.makeRequestInternal(method, path, "v1", data...)
+}
+
+func (c *Client) makeRequestV2(method, path string, data ...interface{}) (interface{}, http.Header, error) {
+	return c.makeRequestInternal(method, path, "v2", data...)
 }
 
 func getIDFromLocationHeader(headers http.Header) string {
