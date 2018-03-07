@@ -66,6 +66,12 @@ Send SMS
   messageId, _ := api.CreateMessage(&bandwidth.CreateMessageData{From: "+19195551212", To: "+191955512142", Text:"Test"})
 ```
 
+Send SMS (via Messaging API v2)
+
+```go
+  message, _ := api.CreateMessageV2(&CreateMessageDataV2{From: "fromNumber", To: "toNumber", Text: "text", ApplicationID: "YOUR_APPLICATION_ID"})
+```
+
 
 Send some SMSes
 
