@@ -3,6 +3,7 @@ package bandwidth
 import (
 	"fmt"
 	"net/http"
+	"net/textproto"
 	"testing"
 )
 
@@ -108,6 +109,13 @@ func TestCheckResponseFail(t *testing.T) {
 	fail(func() (interface{}, http.Header, error) {
 		return api.checkResponse(createFakeResponse("invalid\njson", 400), nil)
 	})
+	err = fail(func() (interface{}, http.Header, error) {
+		resp := createFakeResponse("", 429)
+		resp.Header = map[string][]string{textproto.CanonicalMIMEHeaderKey("X-RateLimit-Reset"): []string{"1479308598680"}}
+		return api.checkResponse(resp, nil)
+	})
+	e := err.(*RateLimitError)
+	expect(t, e.Reset.Unix(), int64(1479308599))
 }
 
 func TestMakeRequest(t *testing.T) {

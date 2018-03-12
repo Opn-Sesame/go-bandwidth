@@ -10,8 +10,19 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
+	"time"
 )
+
+// RateLimitError is error for 429 http error
+type RateLimitError struct {
+	Reset time.Time
+}
+
+func (e *RateLimitError) Error() string {
+	return fmt.Sprintf("RateLimitError: reset at %v", e.Reset)
+}
 
 // Client is main API object
 type Client struct {
@@ -79,6 +90,10 @@ func (c *Client) checkResponse(response *http.Response, responseBody interface{}
 			}
 		}
 		return body, response.Header, nil
+	}
+	if response.StatusCode == 429 {
+		reset, _ := strconv.ParseInt(response.Header.Get("X-RateLimit-Reset"), 10, 64)
+		return nil, nil, &RateLimitError{Reset: time.Unix(int64((reset/1000)+1), 0)}
 	}
 	errorBody := make(map[string]interface{})
 	if len(rawJSON) > 0 {
