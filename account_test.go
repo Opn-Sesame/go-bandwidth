@@ -10,7 +10,7 @@ func TestGetAccount(t *testing.T) {
 		PathAndQuery: "/v1/users/userId/account",
 		Method:       http.MethodGet,
 		ContentToSend: `{
-		"balance": "100",
+		"balance": 100,
 		"accountType": "pre-pay"
 		}`}})
 	defer server.Close()

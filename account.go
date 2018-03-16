@@ -9,7 +9,7 @@ const accountPath = "account"
 
 // Account struct
 type Account struct {
-	Balance     float64 `json:"balance,string"`
+	Balance     float64 `json:"balance"`
 	AccountType string  `json:"accountType"`
 }
 
