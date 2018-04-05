@@ -29,7 +29,7 @@ type AccountTransaction struct {
 	Type        string  `json:"type"`
 	Time        string  `json:"time"`
 	Amount      float64 `json:"amount,string"`
-	Units       string  `json:"units"`
+	Units       int     `json:"units"`
 	ProductType string  `json:"productType"`
 	Number      string  `json:"number"`
 }
