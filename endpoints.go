@@ -43,10 +43,20 @@ type DomainEndpointToken struct {
 	Expires int    `json:"expires"`
 }
 
+// GetDomainEndpointsQuery is optional parameters of GetDomainEndpoints()
+type GetDomainEndpointsQuery struct {
+	Page int
+	Size int
+}
+
 // GetDomainEndpoints returns list of all endpoints for a domain
 // It returns list of DomainEndpoint instances or error
-func (api *Client) GetDomainEndpoints(id string) ([]*DomainEndpoint, error) {
-	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath), &[]*DomainEndpoint{})
+func (api *Client) GetDomainEndpoints(id string, query ...*GetDomainEndpointsQuery) ([]*DomainEndpoint, error) {
+	var options *GetDomainEndpointsQuery
+	if len(query) > 0 {
+		options = query[0]
+	}
+	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", api.concatUserPath(domainsPath), id, endpointsPath), &[]*DomainEndpoint{}, options)
 	if err != nil {
 		return nil, err
 	}
