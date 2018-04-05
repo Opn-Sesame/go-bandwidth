@@ -42,7 +42,7 @@ func TestGetAccountTransactions(t *testing.T) {
 			"time": "2013-02-21T13:39:09.122Z",
 			"amount": "0.00750",
 			"type": "charge",
-			"units": "1",
+			"units": 1,
 			"productType": "sms-out",
 			"number": "{number}"
 		},
@@ -51,7 +51,7 @@ func TestGetAccountTransactions(t *testing.T) {
 			"time": "2013-02-21T13:37:42.079Z",
 			"amount": "0.00750",
 			"type": "charge",
-			"units": "1",
+			"units": 1,
 			"productType": "sms-out",
 			"number": "{number}"
 		}
