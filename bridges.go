@@ -11,7 +11,7 @@ const bridgesPath = "bridges"
 type Bridge struct {
 	ID            string   `json:"id"`
 	State         string   `json:"state"`
-	BridgeAudio   bool     `json:"bridgeAudio,string"`
+	BridgeAudio   bool     `json:"bridgeAudio"`
 	CallIDs       []string `json:"callIds"`
 	CreatedTime   string   `json:"createdTime"`
 	ActivatedTime string   `json:"activatedTime"`
@@ -40,7 +40,7 @@ func (api *Client) GetBridges(query ...*GetBridgesQuery) ([]*Bridge, error) {
 
 // BridgeData struct
 type BridgeData struct {
-	BridgeAudio bool     `json:"bridgeAudio,string,omitempty"`
+	BridgeAudio bool     `json:"bridgeAudio,omitempty"`
 	CallIDs     []string `json:"callIds,omitempty"`
 }
 

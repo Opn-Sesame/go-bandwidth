@@ -13,7 +13,7 @@ func TestGetBridges(t *testing.T) {
 		{
 			"id": "{bridgeId}",
 			"state": "completed",
-			"bridgeAudio": "true",
+			"bridgeAudio": true,
 			"calls":"https://.../v1/users/{userId}/bridges/{bridgeId}/calls",
 			"createdTime": "2013-04-22T13:55:30.279Z",
 			"activatedTime": "2013-04-22T13:55:30.280Z",
@@ -22,7 +22,7 @@ func TestGetBridges(t *testing.T) {
 		{
 			"id": "{bridgeId}",
 			"state": "completed",
-			"bridgeAudio": "true",
+			"bridgeAudio": true,
 			"calls":"https://.../v1/users/{userId}/bridges/{bridgeId}/calls",
 			"createdTime": "2013-04-22T13:58:30.121Z",
 			"activatedTime": "2013-04-22T13:58:30.122Z",
@@ -51,12 +51,12 @@ func TestCreateBridge(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/bridges",
 		Method:           http.MethodPost,
-		EstimatedContent: `{"bridgeAudio":"true","callIds":["{callId1}","{callId2}"]}`,
+		EstimatedContent: `{"bridgeAudio":true,"callIds":["{callId1}","{callId2}"]}`,
 		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/bridges/123"}}})
 	defer server.Close()
 	id, err := api.CreateBridge(&BridgeData{
 		BridgeAudio: true,
-		CallIDs:  []string{"{callId1}", "{callId2}"}})
+		CallIDs:     []string{"{callId1}", "{callId2}"}})
 	if err != nil {
 		t.Error("Failed call of CreateBridge()")
 		return
@@ -72,8 +72,8 @@ func TestCreateBridgeFail(t *testing.T) {
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
 		return api.CreateBridge(&BridgeData{
-		BridgeAudio: true,
-		CallIDs:  []string{"{callId1}", "{callId2}"}})
+			BridgeAudio: true,
+			CallIDs:     []string{"{callId1}", "{callId2}"}})
 	})
 }
 
@@ -84,7 +84,7 @@ func TestGetBridge(t *testing.T) {
 		ContentToSend: `{
 			"id": "{bridgeId}",
 			"state": "completed",
-			"bridgeAudio": "true",
+			"bridgeAudio": true,
 			"calls":"https://.../v1/users/{userId}/bridges/{bridgeId}/calls",
 			"createdTime": "2013-04-22T13:58:30.121Z",
 			"activatedTime": "2013-04-22T13:58:30.122Z",
@@ -115,7 +115,7 @@ func TestUpdateBridge(t *testing.T) {
 		EstimatedContent: `{"callIds":["{callId1}","{callId2}"]}`}})
 	defer server.Close()
 	err := api.UpdateBridge("123", &BridgeData{
-		CallIDs:  []string{"{callId1}", "{callId2}"}})
+		CallIDs: []string{"{callId1}", "{callId2}"}})
 	if err != nil {
 		t.Error("Failed call of UpdateBridge()")
 		return
