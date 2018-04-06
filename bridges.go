@@ -18,10 +18,20 @@ type Bridge struct {
 	CompletedTime string   `json:"completedTime"`
 }
 
+// GetBridgesQuery is optional parameters of GetBridges()
+type GetBridgesQuery struct {
+	Page int
+	Size int
+}
+
 // GetBridges returns list of previous bridges
 // It returns list of Bridge instances or error
-func (api *Client) GetBridges() ([]*Bridge, error) {
-	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(bridgesPath), &[]*Bridge{})
+func (api *Client) GetBridges(query ...*GetBridgesQuery) ([]*Bridge, error) {
+	var options *GetBridgesQuery
+	if len(query) > 0 {
+		options = query[0]
+	}
+	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(bridgesPath), &[]*Bridge{}, options)
 	if err != nil {
 		return nil, err
 	}
