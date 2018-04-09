@@ -9,27 +9,30 @@ const conferencesPath = "conferences"
 
 // Conference struct
 type Conference struct {
-	ID              string `json:"id"`
-	State           string `json:"state"`
-	From            string `json:"from"`
-	CreatedTime     string `json:"createdTime"`
-	CompletedTime   string `json:"completedTime"`
-	ActiveMembers   int    `json:"activeMembers"`
-	CallbackURL     string `json:"callbackUrl"`
-	CallbackTimeout int    `json:"callbackTimeout,string"`
-	FallbackURL     string `json:"fallbackUrl"`
-	Hold            bool   `json:"hold,string"`
-	Mute            bool   `json:"mute,string"`
-	Tag             string `json:"tag"`
+	ID                 string `json:"id"`
+	State              string `json:"state"`
+	From               string `json:"from"`
+	CreatedTime        string `json:"createdTime"`
+	CompletedTime      string `json:"completedTime"`
+	ActiveMembers      int    `json:"activeMembers"`
+	CallbackURL        string `json:"callbackUrl"`
+	CallbackTimeout    int    `json:"callbackTimeout,string"`
+	CallbackHTTPMethod string `json:"callbackHttpMethod"`
+	FallbackURL        string `json:"fallbackUrl"`
+	Hold               bool   `json:"hold,string"`
+	Mute               bool   `json:"mute,string"`
+	Tag                string `json:"tag"`
 }
 
 // CreateConferenceData struct
 type CreateConferenceData struct {
-	From            string `json:"from,omitempty"`
-	CallbackURL     string `json:"callbackUrl,omitempty"`
-	CallbackTimeout int    `json:"callbackTimeout,string,omitempty"`
-	FallbackURL     string `json:"fallbackUrl,omitempty"`
-	Tag             string `json:"tag,omitempty"`
+	From               string `json:"from,omitempty"`
+	CallbackURL        string `json:"callbackUrl,omitempty"`
+	CallbackTimeout    int    `json:"callbackTimeout,string,omitempty"`
+	FallbackURL        string `json:"fallbackUrl,omitempty"`
+	Tag                string `json:"tag,omitempty"`
+	Profile            string `json:"profile,omitempty"`
+	CallbackHTTPMethod string `json:"callbackHttpMethod,omitempty"`
 }
 
 // CreateConference creates a new conference
@@ -54,13 +57,14 @@ func (api *Client) GetConference(id string) (*Conference, error) {
 
 // UpdateConferenceData struct
 type UpdateConferenceData struct {
-	State           string `json:"state,omitempty"`
-	CallbackURL     string `json:"callbackUrl,omitempty"`
-	CallbackTimeout int    `json:"callbackTimeout,string,omitempty"`
-	FallbackURL     string `json:"fallbackUrl,omitempty"`
-	Hold            bool   `json:"hold,string,omitempty"`
-	Mute            bool   `json:"mute,string,omitempty"`
-	Tag             string `json:"tag,omitempty"`
+	State              string `json:"state,omitempty"`
+	CallbackURL        string `json:"callbackUrl,omitempty"`
+	CallbackTimeout    int    `json:"callbackTimeout,string,omitempty"`
+	FallbackURL        string `json:"fallbackUrl,omitempty"`
+	Hold               bool   `json:"hold,string,omitempty"`
+	Mute               bool   `json:"mute,string,omitempty"`
+	Tag                string `json:"tag,omitempty"`
+	CallbackHTTPMethod string `json:"callbackHttpMethod,omitempty"`
 }
 
 // UpdateConference manage an active phone conference. E.g. Answer an incoming conference, reject an incoming conference, turn on / off recording, transfer, hang up
