@@ -16,19 +16,20 @@ type Conference struct {
 	CompletedTime      string `json:"completedTime"`
 	ActiveMembers      int    `json:"activeMembers"`
 	CallbackURL        string `json:"callbackUrl"`
-	CallbackTimeout    int    `json:"callbackTimeout,string"`
+	CallbackTimeout    int    `json:"callbackTimeout"`
 	CallbackHTTPMethod string `json:"callbackHttpMethod"`
 	FallbackURL        string `json:"fallbackUrl"`
-	Hold               bool   `json:"hold,string"`
-	Mute               bool   `json:"mute,string"`
+	Hold               bool   `json:"hold"`
+	Mute               bool   `json:"mute"`
 	Tag                string `json:"tag"`
+	Profile            string `json:"profile"`
 }
 
 // CreateConferenceData struct
 type CreateConferenceData struct {
 	From               string `json:"from,omitempty"`
 	CallbackURL        string `json:"callbackUrl,omitempty"`
-	CallbackTimeout    int    `json:"callbackTimeout,string,omitempty"`
+	CallbackTimeout    int    `json:"callbackTimeout,omitempty"`
 	FallbackURL        string `json:"fallbackUrl,omitempty"`
 	Tag                string `json:"tag,omitempty"`
 	Profile            string `json:"profile,omitempty"`
@@ -61,8 +62,8 @@ type UpdateConferenceData struct {
 	CallbackURL        string `json:"callbackUrl,omitempty"`
 	CallbackTimeout    int    `json:"callbackTimeout,string,omitempty"`
 	FallbackURL        string `json:"fallbackUrl,omitempty"`
-	Hold               bool   `json:"hold,string,omitempty"`
-	Mute               bool   `json:"mute,string,omitempty"`
+	Hold               bool   `json:"hold,omitempty"`
+	Mute               bool   `json:"mute,omitempty"`
 	Tag                string `json:"tag,omitempty"`
 	CallbackHTTPMethod string `json:"callbackHttpMethod,omitempty"`
 }
@@ -88,10 +89,10 @@ type ConferenceMember struct {
 	State       string `json:"state"`
 	AddedTime   string `json:"addedTime"`
 	RemovedTime string `json:"removedTime"`
-	Hold        bool   `json:"hold,string"`
-	Mute        bool   `json:"mute,string"`
-	JoinTone    bool   `json:"joinTone,string"`
-	LeavingTone bool   `json:"leavingTone,string"`
+	Hold        bool   `json:"hold"`
+	Mute        bool   `json:"mute"`
+	JoinTone    bool   `json:"joinTone"`
+	LeavingTone bool   `json:"leavingTone"`
 }
 
 // GetCallID returns call ID of member
@@ -102,10 +103,10 @@ func (m *ConferenceMember) GetCallID() string {
 // CreateConferenceMemberData struct
 type CreateConferenceMemberData struct {
 	CallID      string `json:"callId"`
-	Hold        bool   `json:"hold,string,omitempty"`
-	Mute        bool   `json:"mute,string,omitempty"`
-	JoinTone    bool   `json:"joinTone,string,omitempty"`
-	LeavingTone bool   `json:"leavingTone,string,omitempty"`
+	Hold        bool   `json:"hold,omitempty"`
+	Mute        bool   `json:"mute,omitempty"`
+	JoinTone    bool   `json:"joinTone,omitempty"`
+	LeavingTone bool   `json:"leavingTone,omitempty"`
 }
 
 // CreateConferenceMember creates a new conference member
@@ -141,10 +142,10 @@ func (api *Client) GetConferenceMember(id string, memberID string) (*ConferenceM
 // UpdateConferenceMemberData struct
 type UpdateConferenceMemberData struct {
 	State       string `json:"state,omitempty"`
-	Hold        bool   `json:"hold,string,omitempty"`
-	Mute        bool   `json:"mute,string,omitempty"`
-	JoinTone    bool   `json:"joinTone,string,omitempty"`
-	LeavingTone bool   `json:"leavingTone,string,omitempty"`
+	Hold        bool   `json:"hold,omitempty"`
+	Mute        bool   `json:"mute,omitempty"`
+	JoinTone    bool   `json:"joinTone,omitempty"`
+	LeavingTone bool   `json:"leavingTone,omitempty"`
 }
 
 // UpdateConferenceMember updates a conference member

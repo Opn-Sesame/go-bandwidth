@@ -63,7 +63,7 @@ func TestUpdateConference(t *testing.T) {
 		Method:           http.MethodPost,
 		EstimatedContent: `{"state":"completed"}`}})
 	defer server.Close()
-	err := api.UpdateConference("123",&UpdateConferenceData{State: "completed"})
+	err := api.UpdateConference("123", &UpdateConferenceData{State: "completed"})
 	if err != nil {
 		t.Error("Failed call of UpdateConference()")
 		return
@@ -167,7 +167,7 @@ func TestUpdateConferenceMember(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/conferences/123/members/456",
 		Method:           http.MethodPost,
-		EstimatedContent: `{"mute":"true"}`}})
+		EstimatedContent: `{"mute":true}`}})
 	defer server.Close()
 	err := api.UpdateConferenceMember("123", "456", &UpdateConferenceMemberData{Mute: true})
 	if err != nil {
