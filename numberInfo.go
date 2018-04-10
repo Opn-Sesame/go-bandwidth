@@ -10,9 +10,9 @@ const numberInfoPath = "phoneNumbers/numberInfo"
 
 // NumberInfo struct
 type NumberInfo struct {
-	Created string `json:"created"`
-	Name    string `json:"name"`
 	Number  string `json:"number"`
+	Name    string `json:"name"`
+	Created string `json:"created"`
 	Updated string `json:"updated"`
 }
 
