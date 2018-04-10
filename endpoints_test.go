@@ -38,10 +38,10 @@ func TestCreateDomainEndpoint(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
 		PathAndQuery:     "/v1/users/userId/domains/123/endpoints",
 		Method:           http.MethodPost,
-		EstimatedContent: `{"name":"endpoint"}`,
+		EstimatedContent: `{"name":"endpoint","enabled":true}`,
 		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/domain/123/endpoints/456"}}})
 	defer server.Close()
-	id, err := api.CreateDomainEndpoint("123", &DomainEndpointData{Name: "endpoint"})
+	id, err := api.CreateDomainEndpoint("123", &DomainEndpointData{Name: "endpoint", Enabled: true})
 	if err != nil {
 		t.Error("Failed call of CreateDomainEndpoint()")
 		return
@@ -51,7 +51,7 @@ func TestCreateDomainEndpoint(t *testing.T) {
 
 func TestCreateDomainEndpointFail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:    "/v1/users/userId/domains/123/endpoints",
+		PathAndQuery:     "/v1/users/userId/domains/123/endpoints",
 		Method:           http.MethodPost,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
@@ -62,17 +62,16 @@ func TestCreateDomainEndpointFail(t *testing.T) {
 
 func TestUpdateDomainEndpoint(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: "/v1/users/userId/domains/123/endpoints/456",
-		EstimatedContent: `{"name":"endpoint1"}`,
-		Method:       http.MethodPost}})
+		PathAndQuery:     "/v1/users/userId/domains/123/endpoints/456",
+		EstimatedContent: `{"name":"endpoint1","enabled":true}`,
+		Method:           http.MethodPost}})
 	defer server.Close()
-	err := api.UpdateDomainEndpoint("123", "456", &DomainEndpointData{Name: "endpoint1"})
+	err := api.UpdateDomainEndpoint("123", "456", &DomainEndpointData{Name: "endpoint1", Enabled: true})
 	if err != nil {
 		t.Error("Failed call of UpdateDomainEndpoint()")
 		return
 	}
 }
-
 
 func TestDeleteDomainEndpoint(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
@@ -114,10 +113,10 @@ func TestGetDomainEndpointFail(t *testing.T) {
 
 func TestCreateDomainEndpointToken(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: "/v1/users/userId/domains/123/endpoints/456/tokens",
-		Method:       http.MethodPost,
+		PathAndQuery:     "/v1/users/userId/domains/123/endpoints/456/tokens",
+		Method:           http.MethodPost,
 		EstimatedContent: `null`,
-		ContentToSend: `{"token": "123", "expires": 10}`}})
+		ContentToSend:    `{"token": "123", "expires": 10}`}})
 	defer server.Close()
 	result, err := api.CreateDomainEndpointToken("123", "456")
 	if err != nil {

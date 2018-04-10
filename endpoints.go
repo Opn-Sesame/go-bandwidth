@@ -14,7 +14,7 @@ type DomainEndpoint struct {
 	Description   string                     `json:"description"`
 	DomainID      string                     `json:"domainId"`
 	ApplicationID string                     `json:"applicationId"`
-	Enabled       bool                       `json:"enabled,string"`
+	Enabled       bool                       `json:"enabled"`
 	SipURI        string                     `json:"sipUri"`
 	Credentials   *DomainEndpointCredentials `json:"credentials"`
 }
@@ -25,7 +25,7 @@ type DomainEndpointData struct {
 	Description   string                     `json:"description,omitempty"`
 	DomainID      string                     `json:"domainId,omitempty"`
 	ApplicationID string                     `json:"applicationId,omitempty"`
-	Enabled       bool                       `json:"enabled,string,omitempty"`
+	Enabled       bool                       `json:"enabled"`
 	SipURI        string                     `json:"sipUri,omitempty"`
 	Credentials   *DomainEndpointCredentials `json:"credentials,omitempty"`
 }
