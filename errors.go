@@ -13,6 +13,7 @@ type Error struct {
 	Category string         `json:"category"`
 	Time     string         `json:"time"`
 	Code     string         `json:"code"`
+	Message  string         `json:"message"`
 	Details  []*ErrorDetail `json:"details"`
 }
 
@@ -28,7 +29,6 @@ type GetErrorsQuery struct {
 	Page int
 	Size int
 }
-
 
 // GetErrors returns list of errors
 // It returns list of Error instances or error
