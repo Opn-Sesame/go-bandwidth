@@ -1,8 +1,8 @@
-Catapult API in Go [![GoDoc](https://godoc.org/Bandwidth/go-bandwidth?status.svg)](https://godoc.org/github.com/Bandwidth/go-bandwidth) [![Build Status](https://travis-ci.org/Bandwidth/go-bandwidth.svg)](https://travis-ci.org/Bandwidth/go-bandwidth)
+Bandwidth HTTP Voice & v1 Messaging SDK [![GoDoc](https://godoc.org/Bandwidth/go-bandwidth?status.svg)](https://godoc.org/github.com/Bandwidth/go-bandwidth) [![Build Status](https://travis-ci.org/Bandwidth/go-bandwidth.svg)](https://travis-ci.org/Bandwidth/go-bandwidth)
 ===============
 
 
-Bandwidth [Bandwidth's App Platform](http://ap.bandwidth.com/?utm_medium=social&utm_source=github&utm_campaign=dtolb&utm_content=) Go SDK
+Bandwidth [HTTP Voice & v1 Messaging](https://dev.bandwidth.com) Go SDK
 
 With go-bandwidth  you have access to the entire set of API methods including:
 * **Account** - get user's account data and transactions,
@@ -21,7 +21,7 @@ With go-bandwidth  you have access to the entire set of API methods including:
 * **PhoneNumber** - get access to user's phone numbers,
 * **Recording** - mamange user's recordings.
 
-Also you can work with Bandwidth XML using special types. 
+Also you can work with Bandwidth XML using special types.
 
 ## Install
 
@@ -33,16 +33,16 @@ Also you can work with Bandwidth XML using special types.
 ## Getting Started
 
 * Install `go-bandwidth`,
-* **Get user id, api token and secret** - to use the Catapult API you need these data.  You can get them [here](https://catapult.inetwork.com/pages/catapult.jsf) on the tab "Account",
+* **Get user id, api token and secret** - You can get them [here](https://app.bandwidth.com) on the tab "Account",
 * **Set user id, api token and secret**
 
 ```golang
 	import "github.com/Bandwidth/go-bandwidth"
-	
+
 	api := bandwidth.New("userId", "apiToken", "apiSecret")
 ```
 
-Read [Catapult Api documentation](http://ap.bandwidth.com/) for more details
+Read [Documentation](https://dev.bandwidth.com) for more details
 
 ## Examples
 
@@ -77,7 +77,7 @@ Send some SMSes
 
 ```go
   statuses, error := api.CreateMessages(
-	  &bandwidth.CreateMessageData{From: "+19195551212", To: "+191955512141", Text:"Test1"}, 
+	  &bandwidth.CreateMessageData{From: "+19195551212", To: "+191955512141", Text:"Test1"},
 	  &bandwidth.CreateMessageData{From: "+19195551212", To: "+191955512142", Text:"Test2"})
 ```
 
@@ -100,11 +100,13 @@ Reject incoming call
 ```
 
 Create a gather
+
 ```go
   api.CreateGather(callId, &bandwidth.CreateGatherData{MaxDigits: 3, InterDigitTimeout: 5, Prompt: &bandwidth.GatherPromptData{Sentence: "Please enter 3 digits"}})
 ```
 
 Start a conference
+
 ```go
   api.CreateConference(&bandwidth.CreateConferenceData{From: "+19195551212"})
 ```
@@ -146,12 +148,13 @@ List recordings
 ```
 
 Generate Bandwidth XML
+
 ```go
    import (
 	   "github.com/Bandwidth/go-bandwidth/xml"
 	   "fmt"
    )
-   
+
    response := &xml.Response{}
    speakSentence := xml.SpeakSentence{Sentence: "Transferring your call, please wait.", Voice: "paul", Gender: "male", Locale: "en_US"}
    transfer := xml.Transfer{
@@ -178,5 +181,5 @@ Generate Bandwidth XML
 See directory `examples` for more demos.
 
 # Bugs/Issues
-Please open an issue in this repository and we'll handle it directly. If you have any questions please contact us at openapi@bandwidth.com.
+Please open an issue in this repository and we'll handle it directly. If you have any questions please contact us at developerhelp@bandwidth.com.
 
