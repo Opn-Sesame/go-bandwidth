@@ -58,7 +58,16 @@ func (c *Client) prepareURL(path string, version string) string {
 	if path[0] != '/' {
 		path = "/" + path
 	}
-	return fmt.Sprintf("%s/%s%s", c.APIEndPoint, version, path)
+
+    //Workaround for the V1/V2 base url split
+    var endPoint = ""
+    if version == "v2" {
+        endPoint = "https://messaging.bandwidth.com/api"
+    } else {
+        endPoint = c.APIEndPoint
+    }
+
+	return fmt.Sprintf("%s/%s%s", endPoint, version, path)
 }
 
 func (c *Client) createRequest(method, path string, version string) (*http.Request, error) {
