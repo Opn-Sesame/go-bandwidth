@@ -4,6 +4,8 @@ Bandwidth HTTP Voice & v1 Messaging SDK [![GoDoc](https://godoc.org/Bandwidth/go
 
 Bandwidth [HTTP Voice & v1 Messaging](https://dev.bandwidth.com) Go SDK
 
+Notice: As of April 2019, versions of go-bandwidth less than 1.0.0 will not be compatible with Bandwidth's V2 Messaging. If you are using Bandwidth's V2 Messaging, you will need to update your go-bandwidth package version to 1.0.0 or above. If you are not using Bandwidth's V2 Messaging, you do not need to update. 
+
 With go-bandwidth  you have access to the entire set of API methods including:
 * **Account** - get user's account data and transactions,
 * **Application** - manage user's applications,
