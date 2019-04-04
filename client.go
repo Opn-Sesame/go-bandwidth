@@ -60,13 +60,10 @@ func (c *Client) prepareURL(path string, version string) string {
 	}
 
     //Workaround for the V1/V2 base url split
-    var endPoint = ""
+    var endPoint = c.APIEndPoint
     var apiExtension = ""
     if version == "v2" {
-        endPoint = "https://messaging.bandwidth.com"
         apiExtension = "/api"
-    } else {
-        endPoint = c.APIEndPoint
     }
 
 	return fmt.Sprintf("%s%s/%s%s", endPoint, apiExtension, version, path)

@@ -30,8 +30,16 @@ type CreateMessageResultV2 struct {
 }
 
 // CreateMessageV2 sends a message (SMS/MMS)
-func (api *Client) CreateMessageV2(data *CreateMessageDataV2) (*CreateMessageResultV2, error) {
+func (api *Client) CreateMessageV2(data *CreateMessageDataV2, other ...string) (*CreateMessageResultV2, error) {
+    var v2_endpoint = "https://messaging.bandwidth.com"
+    if len(other) > 0 {
+        v2_endpoint = other[0]
+    }
+
+    var currentAPIEndPoint = api.APIEndPoint
+    api.APIEndPoint = v2_endpoint
 	result, _, err := api.makeRequestV2(http.MethodPost, api.concatUserPath(messagesPath), &CreateMessageResultV2{}, data)
+    api.APIEndPoint = currentAPIEndPoint
 	if err != nil {
 		return nil, err
 	}

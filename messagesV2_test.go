@@ -29,7 +29,7 @@ func TestCreateMessageV2(t *testing.T) {
 			"segmentCount"  : 1
 		  }`}})
 	defer server.Close()
-	message, err := api.CreateMessageV2(&CreateMessageDataV2{From: "fromNumber", To: "toNumber", Text: "text"})
+	message, err := api.CreateMessageV2(&CreateMessageDataV2{From: "fromNumber", To: "toNumber", Text: "text"}, api.APIEndPoint)
 	if err != nil {
 		t.Error("Failed call of CreateMessage()")
 		return
