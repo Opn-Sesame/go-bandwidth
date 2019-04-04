@@ -63,7 +63,6 @@ func (c *Client) prepareURL(path string, version string) string {
     var endPoint = ""
     var apiExtension = ""
     if version == "v2" {
-        fmt.Println("Using new V2 Base")
         endPoint = "https://messaging.bandwidth.com"
         apiExtension = "/api"
     } else {
