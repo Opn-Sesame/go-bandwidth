@@ -58,7 +58,15 @@ func (c *Client) prepareURL(path string, version string) string {
 	if path[0] != '/' {
 		path = "/" + path
 	}
-	return fmt.Sprintf("%s/%s%s", c.APIEndPoint, version, path)
+
+    //Workaround for the V1/V2 base url split
+    var endPoint = c.APIEndPoint
+    var apiExtension = ""
+    if version == "v2" {
+        apiExtension = "/api"
+    }
+
+	return fmt.Sprintf("%s%s/%s%s", endPoint, apiExtension, version, path)
 }
 
 func (c *Client) createRequest(method, path string, version string) (*http.Request, error) {

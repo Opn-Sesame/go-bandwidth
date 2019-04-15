@@ -7,7 +7,7 @@ import (
 
 func TestCreateMessageV2(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v2/users/userId/messages",
+		PathAndQuery:     "/api/v2/users/userId/messages",
 		Method:           http.MethodPost,
 		EstimatedContent: `{"from":"fromNumber","to":"toNumber","text":"text"}`,
 		ContentToSend: `{
@@ -29,7 +29,7 @@ func TestCreateMessageV2(t *testing.T) {
 			"segmentCount"  : 1
 		  }`}})
 	defer server.Close()
-	message, err := api.CreateMessageV2(&CreateMessageDataV2{From: "fromNumber", To: "toNumber", Text: "text"})
+	message, err := api.CreateMessageV2(&CreateMessageDataV2{From: "fromNumber", To: "toNumber", Text: "text"}, api.APIEndPoint)
 	if err != nil {
 		t.Error("Failed call of CreateMessage()")
 		return
@@ -43,7 +43,7 @@ func TestCreateMessageV2(t *testing.T) {
 
 func TestCreateMessageV2Fail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v2/users/userId/messages",
+		PathAndQuery:     "/api/v2/users/userId/messages",
 		Method:           http.MethodPost,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
