@@ -8,22 +8,32 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	api, _ := New(testAccountID, "apiToken", "apiSecret", "userName", "password", nil, nil)
-	expect(t, api.AccountID, testAccountID)
-	expect(t, api.APIToken, "apiToken")
-	expect(t, api.APISecret, "apiSecret")
-	expect(t, api.UserName, "userName")
-	expect(t, api.Password, "password")
+	api, _ := New(Opts{AccountID: testAccountID, APIToken: "apiToken", APISecret: "apiSecret", UserName: "userName", Password: "password"})
+	expect(t, api.accountID, testAccountID)
+	expect(t, api.apiToken, "apiToken")
+	expect(t, api.apiSecret, "apiSecret")
+	expect(t, api.userName, "userName")
+	expect(t, api.password, "password")
 	expect(t, api.AccountsEndpoint, "https://dashboard.bandwidth.com/api/accounts/"+testAccountID)
 	expect(t, api.MessagingEndpoint, fmt.Sprintf("https://messaging.bandwidth.com/api/v2/users/%s/messages", testAccountID))
 }
 
 func TestNewFail(t *testing.T) {
-	shouldFail(t, func() (interface{}, error) { return New("", "apiToken", "apiSecret", "username", "password", nil, nil) })
-	shouldFail(t, func() (interface{}, error) { return New("userId", "", "apiSecret", "username", "password", nil, nil) })
-	shouldFail(t, func() (interface{}, error) { return New("userID", "apiToken", "", "username", "password", nil, nil) })
-	shouldFail(t, func() (interface{}, error) { return New("userID", "apiToken", "apiSecret", "", "password", nil, nil) })
-	shouldFail(t, func() (interface{}, error) { return New("userID", "apiToken", "apiSecret", "username", "", nil, nil) })
+	shouldFail(t, func() (interface{}, error) {
+		return New(Opts{APIToken: "apiToken", APISecret: "apiSecret", UserName: "username", Password: "password"})
+	})
+	shouldFail(t, func() (interface{}, error) {
+		return New(Opts{AccountID: testAccountID, APISecret: "apiSecret", UserName: "username", Password: "password"})
+	})
+	shouldFail(t, func() (interface{}, error) {
+		return New(Opts{AccountID: testAccountID, APIToken: "apiToken", UserName: "username", Password: "password"})
+	})
+	shouldFail(t, func() (interface{}, error) {
+		return New(Opts{AccountID: testAccountID, APIToken: "apiToken", APISecret: "apiSecret", Password: "password"})
+	})
+	shouldFail(t, func() (interface{}, error) {
+		return New(Opts{AccountID: testAccountID, APIToken: "apiToken", APISecret: "apiSecret", UserName: "username"})
+	})
 }
 
 func TestCreateRequest(t *testing.T) {

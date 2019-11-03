@@ -39,34 +39,50 @@ func (e *RateLimitError) Error() string {
 	return fmt.Sprintf("RateLimitError: reset at %v", e.Reset)
 }
 
-// Client is main API object
-type Client struct {
+// Opts are the options to create the client.
+type Opts struct {
+	// mandatory options.
 	AccountID, APIToken, APISecret, UserName, Password string
+	//optional
 	AccountsEndpoint, MessagingEndpoint                string
 	HTTPClient                                         *http.Client
 }
 
+// Client is main API object
+type Client struct {
+	accountID, apiToken, apiSecret, userName, password string
+	AccountsEndpoint, MessagingEndpoint                string
+	httpClient                                         *http.Client
+}
+
 // New creates new instances of api
 // It returns Client instance. Use it to make API calls.
-func New(accountID, apiToken, apiSecret, userName, password string, accountsEndpoint, messagingEndpoint *string) (*Client, error) {
-	if accountID == "" || apiToken == "" || apiSecret == "" || userName == "" || password == "" {
+func New(opts Opts) (*Client, error) {
+	if opts.AccountID == "" || opts.APIToken == "" || opts.APISecret == "" || 
+		opts.UserName == "" || opts.Password == "" {
 		return nil, errors.New("missing auth data")
 	}
 
 	messaging := defaultMessagingEndpoint
-	if messagingEndpoint != nil {
-		messaging = *messagingEndpoint
+	if opts.MessagingEndpoint != "" {
+		messaging = opts.MessagingEndpoint
 	}
 
 	accounts := defaultAccountsEndpoint
-	if accountsEndpoint != nil {
-		accounts = *accountsEndpoint
+	if opts.AccountsEndpoint != "" {
+		accounts = opts.AccountsEndpoint
 	}
 
-	client := &Client{AccountID: accountID, APIToken: apiToken, APISecret: apiSecret, UserName: userName, Password: password,
-		AccountsEndpoint:  accounts + accountsPath + accountID,
-		MessagingEndpoint: messaging + messagingPath + accountID + "/messages", HTTPClient: http.DefaultClient}
-	return client, nil
+	client := http.DefaultClient
+	if opts.HTTPClient != nil {
+		client = opts.HTTPClient
+	}
+
+	c := &Client{accountID: opts.AccountID, apiToken: opts.APIToken, apiSecret: opts.APISecret, 
+		userName: opts.UserName, password: opts.Password,
+		AccountsEndpoint:  accounts + accountsPath + opts.AccountID,
+		MessagingEndpoint: messaging + messagingPath + opts.AccountID + "/messages", httpClient: client}
+	return c, nil
 }
 
 func (c *Client) createRequest(method, path string, requestType endpointRequest) (*http.Request, error) {
@@ -76,10 +92,10 @@ func (c *Client) createRequest(method, path string, requestType endpointRequest)
 	}
 	switch requestType {
 	case messagingRequest:
-		request.SetBasicAuth(c.APIToken, c.APISecret)
+		request.SetBasicAuth(c.apiToken, c.apiSecret)
 		request.Header.Set("Accept", "application/json")
 	default:
-		request.SetBasicAuth(c.UserName, c.Password)
+		request.SetBasicAuth(c.userName, c.password)
 		request.Header.Set("Accept", "application/xml")
 	}
 	request.Header.Set("User-Agent", fmt.Sprintf("go-bandwidth/v2"))
@@ -204,7 +220,7 @@ func (c *Client) makeRequestInternal(method, path string, requestType endpointRe
 			request.Body = nopCloser{bytes.NewReader(rawJSON)}
 		}
 	}
-	response, err := c.HTTPClient.Do(request)
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return nil, nil, err
 	}
