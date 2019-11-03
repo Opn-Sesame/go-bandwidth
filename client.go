@@ -3,6 +3,7 @@ package bandwidth
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -13,6 +14,20 @@ import (
 	"strconv"
 	"strings"
 	"time"
+)
+
+var (
+	defaultAccountsEndpoint  = "https://dashboard.bandwidth.com"
+	accountsPath             = "/api/accounts/"
+	defaultMessagingEndpoint = "https://messaging.bandwidth.com"
+	messagingPath            = "/api/v2/users/"
+)
+
+type endpointRequest int
+
+const (
+	messagingRequest endpointRequest = iota
+	accountsRequest
 )
 
 // RateLimitError is error for 429 http error
@@ -26,61 +41,52 @@ func (e *RateLimitError) Error() string {
 
 // Client is main API object
 type Client struct {
-	UserID, APIToken, APISecret string
-	APIEndPoint                 string
-	HTTPClient                  *http.Client
+	AccountID, APIToken, APISecret, UserName, Password string
+	AccountsEndpoint, MessagingEndpoint                string
+	HTTPClient                                         *http.Client
 }
 
 // New creates new instances of api
 // It returns Client instance. Use it to make API calls.
-// example: api := bandwidth.New("userId", "apiToken", "apiSecret")
-func New(userID, apiToken, apiSecret string, other ...string) (*Client, error) {
-	apiEndPoint := "https://api.catapult.inetwork.com"
-	if userID == "" || apiToken == "" || apiSecret == "" {
-		return nil, errors.New("Missing auth data. Please use api := bandwidth.New(\"user-id\", \"api-token\", \"api-secret\")")
+func New(accountID, apiToken, apiSecret, userName, password string, accountsEndpoint, messagingEndpoint *string) (*Client, error) {
+	if accountID == "" || apiToken == "" || apiSecret == "" || userName == "" || password == "" {
+		return nil, errors.New("missing auth data")
 	}
-	l := len(other)
-	if l > 0 {
-		apiEndPoint = other[0]
+
+	messaging := defaultMessagingEndpoint
+	if messagingEndpoint != nil {
+		messaging = *messagingEndpoint
 	}
-	client := &Client{userID, apiToken, apiSecret, apiEndPoint, http.DefaultClient}
+
+	accounts := defaultAccountsEndpoint
+	if accountsEndpoint != nil {
+		accounts = *accountsEndpoint
+	}
+
+	client := &Client{AccountID: accountID, APIToken: apiToken, APISecret: apiSecret, UserName: userName, Password: password,
+		AccountsEndpoint:  accounts + accountsPath + accountID,
+		MessagingEndpoint: messaging + messagingPath + accountID + "/messages", HTTPClient: http.DefaultClient}
 	return client, nil
 }
 
-func (c *Client) concatUserPath(path string) string {
-	if path[0] != '/' {
-		path = "/" + path
-	}
-	return fmt.Sprintf("/users/%s%s", c.UserID, path)
-}
-
-func (c *Client) prepareURL(path string, version string) string {
-	if path[0] != '/' {
-		path = "/" + path
-	}
-
-    //Workaround for the V1/V2 base url split
-    var endPoint = c.APIEndPoint
-    var apiExtension = ""
-    if version == "v2" {
-        apiExtension = "/api"
-    }
-
-	return fmt.Sprintf("%s%s/%s%s", endPoint, apiExtension, version, path)
-}
-
-func (c *Client) createRequest(method, path string, version string) (*http.Request, error) {
-	request, err := http.NewRequest(method, c.prepareURL(path, version), nil)
+func (c *Client) createRequest(method, path string, requestType endpointRequest) (*http.Request, error) {
+	request, err := http.NewRequest(method, path, nil)
 	if err != nil {
 		return nil, err
 	}
-	request.SetBasicAuth(c.APIToken, c.APISecret)
-	request.Header.Set("Accept", "application/json")
-	request.Header.Set("User-Agent", fmt.Sprintf("go-bandwidth/v%s", Version))
+	switch requestType {
+	case messagingRequest:
+		request.SetBasicAuth(c.APIToken, c.APISecret)
+		request.Header.Set("Accept", "application/json")
+	default:
+		request.SetBasicAuth(c.UserName, c.Password)
+		request.Header.Set("Accept", "application/xml")
+	}
+	request.Header.Set("User-Agent", fmt.Sprintf("go-bandwidth/v2"))
 	return request, nil
 }
 
-func (c *Client) checkResponse(response *http.Response, responseBody interface{}) (interface{}, http.Header, error) {
+func (c *Client) checkJSONResponse(response *http.Response, responseBody interface{}) (interface{}, http.Header, error) {
 	defer response.Body.Close()
 	body := responseBody
 	if body == nil {
@@ -120,21 +126,45 @@ func (c *Client) checkResponse(response *http.Response, responseBody interface{}
 	return nil, nil, errors.New(message.(string))
 }
 
-func (c *Client) makeRequestInternal(method, path string, version string, data ...interface{}) (interface{}, http.Header, error) {
-	request, err := c.createRequest(method, path, version)
+func (c *Client) checkXMLResponse(response *http.Response, responseBody interface{}) (interface{}, http.Header, error) {
+	defer response.Body.Close()
+	body := responseBody
+	if body == nil {
+		body = map[string]interface{}{}
+	}
+	rawXML, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	if response.StatusCode >= 200 && response.StatusCode < 400 {
+		if len(rawXML) > 0 {
+			err = xml.Unmarshal([]byte(rawXML), &body)
+			if err != nil {
+				return nil, nil, err
+			}
+		}
+		return body, response.Header, nil
+	}
+	if response.StatusCode == 429 {
+		reset, _ := strconv.ParseInt(response.Header.Get("X-RateLimit-Reset"), 10, 64)
+		return nil, nil, &RateLimitError{Reset: time.Unix(int64((reset/1000)+1), 0)}
+	}
+
+	// TODO(bashar): Figure out how to deal with errors and what format they come in.
+	return nil, nil, fmt.Errorf("Http code %d", response.StatusCode)
+}
+
+func (c *Client) makeRequestInternal(method, path string, requestType endpointRequest, data ...interface{}) (interface{}, http.Header, error) {
+	request, err := c.createRequest(method, path, requestType)
 	var responseBody interface{}
-	treatDataAsQuery := false
 	if err != nil {
 		return nil, nil, err
 	}
 	if len(data) > 0 {
 		responseBody = data[0]
 	}
-	if len(data) > 2 {
-		treatDataAsQuery = data[2].(bool)
-	}
 	if len(data) > 1 {
-		if method == "GET" || treatDataAsQuery {
+		if method == "GET" {
 			var item map[string]string
 			if data[1] == nil {
 				item = make(map[string]string)
@@ -178,28 +208,21 @@ func (c *Client) makeRequestInternal(method, path string, version string, data .
 	if err != nil {
 		return nil, nil, err
 	}
-	return c.checkResponse(response, responseBody)
-}
 
-func (c *Client) makeRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
-	return c.makeRequestInternal(method, path, "v1", data...)
-}
-
-func (c *Client) makeRequestV2(method, path string, data ...interface{}) (interface{}, http.Header, error) {
-	return c.makeRequestInternal(method, path, "v2", data...)
-}
-
-func getIDFromLocationHeader(headers http.Header) string {
-	return getIDFromLocation(headers.Get("Location"))
-}
-
-func getIDFromLocation(location string) string {
-	list := strings.Split(location, "/")
-	l := len(list)
-	if l == 0 {
-		return ""
+	switch requestType {
+	case messagingRequest:
+		return c.checkJSONResponse(response, responseBody)
+	default:
+		return c.checkXMLResponse(response, responseBody)
 	}
-	return list[l-1]
+}
+
+func (c *Client) makeMessagingRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
+	return c.makeRequestInternal(method, path, messagingRequest, data...)
+}
+
+func (c *Client) makeAccountsRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
+	return c.makeRequestInternal(method, path, accountsRequest, data...)
 }
 
 type nopCloser struct {

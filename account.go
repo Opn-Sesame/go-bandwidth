@@ -1,45 +1,60 @@
 package bandwidth
 
 import (
-	"fmt"
 	"net/http"
 )
 
-const accountPath = "account"
-
-// Account struct
-type Account struct {
-	Balance     float64 `json:"balance"`
-	AccountType string  `json:"accountType"`
+// AssociatedSipPeer returns an associated sip-peer (aka location) with the app.
+type AssociatedSipPeer struct {
+	// SiteId is the ID of the site.
+	SiteID string `xml:"SiteId"`
+	// SiteName is the name of the site.
+	SiteName string
+	// PeerId is the ID of the peer. This is used alongside side-id to retrieve the actual numbers.
+	PeerID string `xml:"PeerId"`
 }
 
-// GetAccount returns account information (balance, etc)
-// It returns Account instance or error
-func (api *Client) GetAccount() (*Account, error) {
-	result, _, err := api.makeRequest(http.MethodGet, api.concatUserPath(accountPath), &Account{})
+// AssociatedSipPeers is a list of associated sip peers.
+type AssociatedSipPeers struct {
+	Associated []AssociatedSipPeer `xml:"AssociatedSipPeer"`
+}
+
+// AssociatedSipPeersResponse struct
+type AssociatedSipPeersResponse struct {
+	Peers AssociatedSipPeers `xml:"AssociatedSipPeers"`
+}
+
+// GetAssociatedPeers returns the associated sippeers (aka locations) for the application.
+func (c *Client) GetAssociatedPeers(applicationID string) (*AssociatedSipPeersResponse, error) {
+	path := c.AccountsEndpoint + "/applications/" + applicationID + "/associatedsippeers"
+	result, _, err := c.makeAccountsRequest(http.MethodGet, path, &AssociatedSipPeersResponse{})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*Account), nil
+	return result.(*AssociatedSipPeersResponse), nil
 }
 
-// AccountTransaction struct
-type AccountTransaction struct {
-	ID          string  `json:"id"`
-	Type        string  `json:"type"`
-	Time        string  `json:"time"`
-	Amount      float64 `json:"amount,string"`
-	Units       int     `json:"units"`
-	ProductType string  `json:"productType"`
-	Number      string  `json:"number"`
+// SipPeerTelephoneNumber is the phone number.
+type SipPeerTelephoneNumber struct {
+	FullNumber string
 }
 
-// GetAccountTransactions returns transactions from the user's account
-// It returns list of AccountTransaction instances or error
-func (api *Client) GetAccountTransactions() ([]*AccountTransaction, error) {
-	result, _, err := api.makeRequest(http.MethodGet, fmt.Sprintf("%s/%s", api.concatUserPath(accountPath), "transactions"), &[]*AccountTransaction{})
+// SipPeerTelephoneNumbers is a collection of phone numbers.
+type SipPeerTelephoneNumbers struct {
+	Numbers []SipPeerTelephoneNumber `xml:"SipPeerTelephoneNumber"`
+}
+
+// SipPeerTelephoneNumbersResponse is the response to fetching sip-peers.
+type SipPeerTelephoneNumbersResponse struct {
+	Peers SipPeerTelephoneNumbers `xml:"SipPeerTelephoneNumbers"`
+}
+
+// GetTollFreeNumbers returns the toll-free numbers associated with the site.
+func (c *Client) GetTollFreeNumbers(siteID, peerID string) (*SipPeerTelephoneNumbersResponse, error) {
+	path := c.AccountsEndpoint + "/sites/" + siteID + "/sippeers/" + peerID + "/tns"
+	result, _, err := c.makeAccountsRequest(http.MethodGet, path, &SipPeerTelephoneNumbersResponse{})
 	if err != nil {
 		return nil, err
 	}
-	return *(result.(*[]*AccountTransaction)), nil
+	return result.(*SipPeerTelephoneNumbersResponse), nil
 }

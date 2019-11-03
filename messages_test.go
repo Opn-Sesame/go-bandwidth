@@ -1,133 +1,55 @@
 package bandwidth
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 )
 
-func TestGetMessages(t *testing.T) {
-	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: "/v1/users/userId/messages",
-		Method:       http.MethodGet,
-		ContentToSend: `[{
-			"id": "{messageId1}",
-			"text": "message1"
-		}, {
-			"id": "{messageId2}",
-			"text": "message2"
-		}]`}})
-	defer server.Close()
-	result, err := api.GetMessages()
-	if err != nil {
-		t.Error("Failed call of GetMessages()")
-		return
-	}
-	expect(t, len(result), 2)
-}
-
-func TestGetMessagesWithQuery(t *testing.T) {
-	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: "/v1/users/userId/messages?to=123",
-		Method:       http.MethodGet,
-		ContentToSend: `[{
-			"id": "{messageId1}",
-			"text": "message1"
-		}, {
-			"id": "{messageId2}",
-			"text": "message2"
-		}]`}})
-	defer server.Close()
-	result, err := api.GetMessages(&GetMessagesQuery{To: "123"})
-	if err != nil {
-		t.Error("Failed call of GetMessages()")
-		return
-	}
-	expect(t, len(result), 2)
-}
-
-func TestGetMessagesFail(t *testing.T) {
-	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/messages",
-		Method:           http.MethodGet,
-		StatusCodeToSend: http.StatusBadRequest}})
-	defer server.Close()
-	shouldFail(t, func() (interface{}, error) { return api.GetMessages() })
-}
-
 func TestCreateMessage(t *testing.T) {
+
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/messages",
+		PathAndQuery:     fmt.Sprintf("/api/v2/users/%s/messages", testAccountID),
 		Method:           http.MethodPost,
 		EstimatedContent: `{"from":"fromNumber","to":"toNumber","text":"text"}`,
-		HeadersToSend:    map[string]string{"Location": "/v1/users/{userId}/messages/123"}}})
+		ContentToSend: `{
+			"id"            : "14762070468292kw2fuqty55yp2b2",
+			"time"          : "2016-09-14T18:20:16Z",
+			"to"            : [
+			  "+12345678902",
+			  "+12345678903"
+			],
+			"from"          : "+12345678901",
+			"text"          : "Hey, check this out!",
+			"applicationId" : "93de2206-9669-4e07-948d-329f4b722ee2",
+			"tag"           : "test message",
+			"owner"         : "+12345678901",
+			"media"         : [
+			  "https://s3.amazonaws.com/bw-v2-api/demo.jpg"
+			],
+			"direction"     : "out",
+			"segmentCount"  : 1
+		  }`}})
 	defer server.Close()
-	id, err := api.CreateMessage(&CreateMessageData{From: "fromNumber", To: "toNumber", Text: "text"})
+	message, err := api.CreateMessage(&CreateMessage{From: "fromNumber", To: "toNumber", Text: "text"})
 	if err != nil {
 		t.Error("Failed call of CreateMessage()")
 		return
 	}
-	expect(t, id, "123")
+	tm := message.Time.String()
+	expect(t, message.ID, "14762070468292kw2fuqty55yp2b2")
+	expect(t, tm, "2016-09-14 18:20:16 +0000 UTC")
+	expect(t, len(message.To.([]interface{})), 2)
+	expect(t, len(message.Media), 1)
 }
 
-func TestCreateMessageFail(t *testing.T) {
+func TestCreateMessageV2Fail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/messages",
+		PathAndQuery:     "/api/v2/users/userId/messages",
 		Method:           http.MethodPost,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreateMessage(&CreateMessageData{From: "fromNumber", To: "toNumber", Text: "text"})
+		return api.CreateMessage(&CreateMessage{From: "fromNumber", To: "toNumber", Text: "text"})
 	})
-}
-
-func TestCreateMessages(t *testing.T) {
-	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/messages",
-		Method:           http.MethodPost,
-		EstimatedContent: `[{"from":"fromNumber","to":"toNumber","text":"text"}]`,
-		ContentToSend: `[{"result":"accepted","location":"http://host/123"}]`}})
-	defer server.Close()
-	statuses, err := api.CreateMessages(&CreateMessageData{From: "fromNumber", To: "toNumber", Text: "text"})
-	if err != nil {
-		t.Error("Failed call of CreateMessages()")
-		return
-	}
-	expect(t, statuses[0].ID, "123")
-}
-
-func TestCreateMessagesFail(t *testing.T) {
-	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/messages",
-		Method:           http.MethodPost,
-		StatusCodeToSend: http.StatusBadRequest}})
-	defer server.Close()
-	shouldFail(t, func() (interface{}, error) {
-		return api.CreateMessages(&CreateMessageData{From: "fromNumber", To: "toNumber", Text: "text"})
-	})
-}
-
-func TestGetMessage(t *testing.T) {
-	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: "/v1/users/userId/messages/123",
-		Method:       http.MethodGet,
-		ContentToSend: `{
-			"id": "{messageId1}",
-			"text": "message1"
-		}`}})
-	defer server.Close()
-	result, err := api.GetMessage("123")
-	if err != nil {
-		t.Error("Failed call of GetMessage()")
-		return
-	}
-	expect(t, result.ID, "{messageId1}")
-}
-
-func TestGetMessageFail(t *testing.T) {
-	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/messages/123",
-		Method:           http.MethodGet,
-		StatusCodeToSend: http.StatusBadRequest}})
-	defer server.Close()
-	shouldFail(t, func() (interface{}, error) { return api.GetMessage("123") })
 }

@@ -1,77 +1,84 @@
 package bandwidth
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 )
 
-func TestGetAccount(t *testing.T) {
+func TestGetAssociatedPeers(t *testing.T) {
+	siteID := "12345"
+	peerID := "123123"
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: "/v1/users/userId/account",
+		PathAndQuery: fmt.Sprintf("%s%s/applications/%s/associatedsippeers", accountsPath, testAccountID, testApplicationID),
 		Method:       http.MethodGet,
-		ContentToSend: `{
-		"balance": 100,
-		"accountType": "pre-pay"
-		}`}})
+		ContentToSend: fmt.Sprintf(`
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+			<AssociatedSipPeersResponse>
+				<AssociatedSipPeers>
+					<AssociatedSipPeer>
+						<SiteId>%s</SiteId>
+						<SiteName>Test-Subaccount-1</SiteName>
+						<PeerId>%s</PeerId>
+						<PeerName>default</PeerName>
+					</AssociatedSipPeer>
+				</AssociatedSipPeers>
+			</AssociatedSipPeersResponse>`, siteID, peerID)}})
 	defer server.Close()
-	result, err := api.GetAccount()
+	result, err := api.GetAssociatedPeers(testApplicationID)
 	if err != nil {
-		t.Error("Failed call of GetAccount()")
+		t.Errorf("Failed call of GetAssociatedPeers(): %v", err)
 		return
 	}
-	expect(t, result.Balance, 100.0)
-	expect(t, result.AccountType, "pre-pay")
+	expect(t, len(result.Peers.Associated), 1)
+	expect(t, result.Peers.Associated[0].SiteID, siteID)
+	expect(t, result.Peers.Associated[0].PeerID, peerID)
 }
 
-func TestGetAccountFail(t *testing.T) {
+func TestGetAssociatedPeersFail(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/account",
+		PathAndQuery:     fmt.Sprintf("%s%s/applications/%s/associatedsippeers", accountsPath, testAccountID, testApplicationID),
 		Method:           http.MethodGet,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	shouldFail(t, func() (interface{}, error) { return api.GetAccount() })
+	shouldFail(t, func() (interface{}, error) { return api.GetAssociatedPeers(testApplicationID) })
 }
 
-func TestGetAccountTransactions(t *testing.T) {
+func TestGetTollFreeNumbers(t *testing.T) {
+	siteID := "12345"
+	peerID := "123123"
+	number := "1234567890"
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: "/v1/users/userId/account/transactions",
+		PathAndQuery: fmt.Sprintf("%s%s/sites/%s/sippeers/%s/tns", accountsPath, testAccountID, siteID, peerID),
 		Method:       http.MethodGet,
-		ContentToSend: `[
-		{
-			"id": "{transactionId1}",
-			"time": "2013-02-21T13:39:09.122Z",
-			"amount": "0.00750",
-			"type": "charge",
-			"units": 1,
-			"productType": "sms-out",
-			"number": "{number}"
-		},
-		{
-			"id": "{transactionId2}",
-			"time": "2013-02-21T13:37:42.079Z",
-			"amount": "0.00750",
-			"type": "charge",
-			"units": 1,
-			"productType": "sms-out",
-			"number": "{number}"
-		}
-		]`}})
+		ContentToSend: fmt.Sprintf(`
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+			<SipPeerTelephoneNumbersResponse>
+				<Links><first>Link=&lt;https://dashboard.bandwidth.com:443/v1.0/accounts/%v/sites/%v/sippeers/%v/tns?page=1&amp;size=50000&gt;;rel="first";</first>
+				</Links>
+				<SipPeerTelephoneNumbers>
+					<SipPeerTelephoneNumber>
+						<FullNumber>%s</FullNumber>
+					</SipPeerTelephoneNumber>
+				</SipPeerTelephoneNumbers>
+			</SipPeerTelephoneNumbersResponse>`, testAccountID, siteID, peerID, number)}})
 	defer server.Close()
-	result, err := api.GetAccountTransactions()
+	result, err := api.GetTollFreeNumbers(siteID, peerID)
 	if err != nil {
-		t.Error("Failed call of GetAccountTransactions()")
+		t.Errorf("Failed call of GetAssociatedPeers(): %v", err)
 		return
 	}
-	expect(t, len(result), 2)
-	expect(t, result[0].ID, "{transactionId1}")
-	expect(t, result[1].ID, "{transactionId2}")
+	expect(t, len(result.Peers.Numbers), 1)
+	expect(t, result.Peers.Numbers[0].FullNumber, number)
 }
 
-func TestGetAccountTransactionsFail(t *testing.T) {
+func TestGetTollFreeNumbersFail(t *testing.T) {
+	siteID := "12345"
+	peerID := "123123"
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/users/userId/account/transactions",
+		PathAndQuery:     fmt.Sprintf("%s%s/sites/%s/sippeers/%s/tns", accountsPath, testAccountID, siteID, peerID),
 		Method:           http.MethodGet,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	shouldFail(t, func() (interface{}, error) { return api.GetAccountTransactions() })
+	shouldFail(t, func() (interface{}, error) { return api.GetTollFreeNumbers(siteID, peerID) })
 }

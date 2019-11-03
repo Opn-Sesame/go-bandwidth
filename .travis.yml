@@ -1,8 +1,7 @@
 language: go
 
 go:
-  - 1.9.2
-  - tip
+  - 1.12.x
 
 before_install:
   - export PATH=$HOME/gopath/bin:$PATH
@@ -10,10 +9,6 @@ before_install:
 script:
   - go test -race ./...
   - go test -cover ./...
-
-matrix:
-    allow_failures:
-        - go: tip
 
 git:
   depth: 10

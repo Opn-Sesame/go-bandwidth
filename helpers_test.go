@@ -3,12 +3,17 @@ package bandwidth
 import (
 	"bytes"
 	"fmt"
-	"reflect"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
+)
+
+var (
+	testAccountID     = "123"
+	testApplicationID = "1-2-3-4"
 )
 
 func expect(t *testing.T, value interface{}, expected interface{}) {
@@ -32,8 +37,8 @@ func shouldFail(t *testing.T, action func() (interface{}, error)) error {
 	return err
 }
 
-func getAPI() *Client {
-	api, _ := New("userId", "apiToken", "apiSecret")
+func getAPI(endpoint string) *Client {
+	api, _ := New(testAccountID, "apiToken", "apiSecret", "test", "password", &endpoint, &endpoint)
 	return api
 }
 
@@ -55,7 +60,6 @@ type RequestHandler struct {
 }
 
 func startMockServer(t *testing.T, handlers []RequestHandler) (*httptest.Server, *Client) {
-	api := getAPI()
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		for _, handler := range handlers {
 			if handler.Method == "" {
@@ -92,7 +96,7 @@ func startMockServer(t *testing.T, handlers []RequestHandler) (*httptest.Server,
 		t.Logf("Unhandled request %s %s", r.Method, r.URL.String())
 		w.WriteHeader(http.StatusNotFound)
 	}))
-	api.APIEndPoint = mockServer.URL
+	api := getAPI(mockServer.URL)
 	return mockServer, api
 }
 

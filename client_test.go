@@ -8,85 +8,66 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	api, _ := New("userId", "apiToken", "apiSecret")
-	expect(t, api.UserID, "userId")
+	api, _ := New(testAccountID, "apiToken", "apiSecret", "userName", "password", nil, nil)
+	expect(t, api.AccountID, testAccountID)
 	expect(t, api.APIToken, "apiToken")
 	expect(t, api.APISecret, "apiSecret")
-	expect(t, api.APIEndPoint, "https://api.catapult.inetwork.com")
-}
-
-func TestNewWithEndpointAndVersion(t *testing.T) {
-	api, _ := New("userId", "apiToken", "apiSecret", "endpoint")
-	expect(t, api.UserID, "userId")
-	expect(t, api.APIToken, "apiToken")
-	expect(t, api.APISecret, "apiSecret")
-	expect(t, api.APIEndPoint, "endpoint")
+	expect(t, api.UserName, "userName")
+	expect(t, api.Password, "password")
+	expect(t, api.AccountsEndpoint, "https://dashboard.bandwidth.com/api/accounts/"+testAccountID)
+	expect(t, api.MessagingEndpoint, fmt.Sprintf("https://messaging.bandwidth.com/api/v2/users/%s/messages", testAccountID))
 }
 
 func TestNewFail(t *testing.T) {
-	shouldFail(t, func() (interface{}, error) { return New("", "apiToken", "apiSecret") })
-	shouldFail(t, func() (interface{}, error) { return New("userId", "", "apiSecret") })
-	shouldFail(t, func() (interface{}, error) { return New("userID", "apiToken", "") })
-}
-
-func TestConcatUserPath(t *testing.T) {
-	api := getAPI()
-	if api.concatUserPath("test") != "/users/userId/test" {
-		t.Error("Should return valid path (without slash)")
-	}
-	if api.concatUserPath("/test") != "/users/userId/test" {
-		t.Error("Should return valid path (with slash)")
-	}
-}
-
-func TestPrepareURL(t *testing.T) {
-	api := getAPI()
-	if api.prepareURL("test", "v1") != "https://api.catapult.inetwork.com/v1/test" {
-		t.Error("Should return valid url (without slash)")
-	}
-	if api.prepareURL("/test", "v1") != "https://api.catapult.inetwork.com/v1/test" {
-		t.Error("Should return valid url (with slash)")
-	}
+	shouldFail(t, func() (interface{}, error) { return New("", "apiToken", "apiSecret", "username", "password", nil, nil) })
+	shouldFail(t, func() (interface{}, error) { return New("userId", "", "apiSecret", "username", "password", nil, nil) })
+	shouldFail(t, func() (interface{}, error) { return New("userID", "apiToken", "", "username", "password", nil, nil) })
+	shouldFail(t, func() (interface{}, error) { return New("userID", "apiToken", "apiSecret", "", "password", nil, nil) })
+	shouldFail(t, func() (interface{}, error) { return New("userID", "apiToken", "apiSecret", "username", "", nil, nil) })
 }
 
 func TestCreateRequest(t *testing.T) {
-	api := getAPI()
-	req, err := api.createRequest(http.MethodGet, "/test", "v1")
+	endpoint := "https://localhost"
+	api := getAPI(endpoint)
+	req, err := api.createRequest(http.MethodGet, endpoint+"/v2/test", messagingRequest)
 	if err != nil {
 		t.Fatal(err)
 	}
-	expect(t, req.URL.String(), "https://api.catapult.inetwork.com/v1/test")
+	expect(t, req.URL.String(), endpoint+"/v2/test")
 	expect(t, req.Method, http.MethodGet)
 	expect(t, req.Header.Get("Accept"), "application/json")
-	expect(t, req.Header.Get("User-Agent"), fmt.Sprintf("go-bandwidth/v%s", Version))
+	expect(t, req.Header.Get("User-Agent"), "go-bandwidth/v2")
 	expect(t, req.Header.Get("Authorization"), "Basic YXBpVG9rZW46YXBpU2VjcmV0")
 }
 
 func TestCreateRequestFail(t *testing.T) {
-	api := getAPI()
+	endpoint := "https://localhost"
+	api := getAPI(endpoint)
 	shouldFail(t, func() (interface{}, error) {
-		return api.createRequest("invalid\n\r\tmethod", "invalid:/\n/ url = ", "v1")
+		return api.createRequest("invalid\n\r\tmethod", "invalid:/\n/ url = ", messagingRequest)
 	})
 }
 
-func TestCheckResponse(t *testing.T) {
+func TestCheckJSONResponse(t *testing.T) {
 	type Test struct {
 		Test string `json:"test"`
 	}
-	api := getAPI()
-	data, _, _ := api.checkResponse(createFakeResponse(`{"test": "test"}`, 200), map[string]interface{}{})
+	endpoint := "https://localhost"
+	api := getAPI(endpoint)
+	data, _, _ := api.checkJSONResponse(createFakeResponse(`{"test": "test"}`, 200), map[string]interface{}{})
 	result := data.(map[string]interface{})
 	expect(t, result["test"].(string), "test")
-	data, _, _ = api.checkResponse(createFakeResponse(`{"test": "test"}`, 200), nil)
+	data, _, _ = api.checkJSONResponse(createFakeResponse(`{"test": "test"}`, 200), nil)
 	result = data.(map[string]interface{})
 	expect(t, result["test"].(string), "test")
-	data, _, _ = api.checkResponse(createFakeResponse(`{"test": "test"}`, 200), &Test{})
+	data, _, _ = api.checkJSONResponse(createFakeResponse(`{"test": "test"}`, 200), &Test{})
 	testResult := data.(*Test)
 	expect(t, testResult.Test, "test")
 }
 
 func TestCheckResponseFail(t *testing.T) {
-	api := getAPI()
+	endpoint := "https://localhost"
+	api := getAPI(endpoint)
 	fail := func(action func() (interface{}, http.Header, error)) error {
 		_, _, err := action()
 		if err == nil {
@@ -95,24 +76,24 @@ func TestCheckResponseFail(t *testing.T) {
 		return err
 	}
 	err := fail(func() (interface{}, http.Header, error) {
-		return api.checkResponse(createFakeResponse(`{"code": "400", "message": "some error"}`, 400), nil)
+		return api.checkJSONResponse(createFakeResponse(`{"code": "400", "message": "some error"}`, 400), nil)
 	})
 	expect(t, err.Error(), "some error")
 	err = fail(func() (interface{}, http.Header, error) {
-		return api.checkResponse(createFakeResponse(`{"code": "400"}`, 400), nil)
+		return api.checkJSONResponse(createFakeResponse(`{"code": "400"}`, 400), nil)
 	})
 	expect(t, err.Error(), "400")
 	err = fail(func() (interface{}, http.Header, error) {
-		return api.checkResponse(createFakeResponse("", 400), nil)
+		return api.checkJSONResponse(createFakeResponse("", 400), nil)
 	})
 	expect(t, err.Error(), "Http code 400")
 	fail(func() (interface{}, http.Header, error) {
-		return api.checkResponse(createFakeResponse("invalid\njson", 400), nil)
+		return api.checkJSONResponse(createFakeResponse("invalid\njson", 400), nil)
 	})
 	err = fail(func() (interface{}, http.Header, error) {
 		resp := createFakeResponse("", 429)
 		resp.Header = map[string][]string{textproto.CanonicalMIMEHeaderKey("X-RateLimit-Reset"): []string{"1479308598680"}}
-		return api.checkResponse(resp, nil)
+		return api.checkJSONResponse(resp, nil)
 	})
 	e := err.(*RateLimitError)
 	expect(t, e.Reset.Unix(), int64(1479308599))
@@ -120,38 +101,19 @@ func TestCheckResponseFail(t *testing.T) {
 
 func TestMakeRequest(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:  "/v1/test",
+		PathAndQuery:  fmt.Sprintf("/api/v2/users/%s/messages", testAccountID),
 		ContentToSend: `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodGet, "/test", map[string]interface{}{})
+	result, _, _ := api.makeMessagingRequest(http.MethodGet, api.MessagingEndpoint, map[string]interface{}{})
 	expect(t, result.(map[string]interface{})["test"], "test")
-}
-
-func TestMakeRequestFail(t *testing.T) {
-	api := getAPI()
-	shouldFail(t, func() (interface{}, error) {
-		_, _, err := api.makeRequest("invalid\n\r\tmethod", "invalid:/\n/ url = ")
-		return nil, err
-	})
-}
-
-func TestMakeRequestWithArrayAsResponse(t *testing.T) {
-	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:  "/v1/test",
-		ContentToSend: `[{"test": "test"}]`}})
-	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodGet, "/test", &[]map[string]string{})
-	list := *(result.(*[]map[string]string))
-	expect(t, len(list), 1)
-	expect(t, list[0]["test"], "test")
 }
 
 func TestMakeRequestWithQuery(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:  "/v1/test?field1=value1&field2=value+with+space",
+		PathAndQuery:  fmt.Sprintf("/api/v2/users/%s/messages?field1=value1&field2=value+with+space", testAccountID),
 		ContentToSend: `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodGet, "/test", nil, map[string]string{
+	result, _, _ := api.makeMessagingRequest(http.MethodGet, api.MessagingEndpoint, nil, map[string]string{
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
@@ -159,13 +121,13 @@ func TestMakeRequestWithQuery(t *testing.T) {
 
 func TestMakeRequestWithBody(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:     "/v1/test",
+		PathAndQuery:     fmt.Sprintf("/api/v2/users/%s/messages", testAccountID),
 		Method:           http.MethodPost,
 		EstimatedHeaders: map[string]string{"Content-Type": "application/json"},
 		EstimatedContent: `{"field1":"value1","field2":"value with space"}`,
 		ContentToSend:    `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodPost, "/test", nil, map[string]interface{}{
+	result, _, _ := api.makeMessagingRequest(http.MethodPost, api.MessagingEndpoint, nil, map[string]interface{}{
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
@@ -173,23 +135,10 @@ func TestMakeRequestWithBody(t *testing.T) {
 
 func TestMakeRequestWithEmptyResponse(t *testing.T) {
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery:  "/v1/test",
+		PathAndQuery:  fmt.Sprintf("/api/v2/users/%s/messages", testAccountID),
 		Method:        http.MethodGet,
 		ContentToSend: ""}})
 	defer server.Close()
-	result, _, _ := api.makeRequest(http.MethodGet, "/test", &[]interface{}{})
+	result, _, _ := api.makeMessagingRequest(http.MethodGet, api.MessagingEndpoint, &[]interface{}{})
 	expect(t, len(*result.(*[]interface{})), 0)
-}
-
-func TestGetIDFromLocationHeader(t *testing.T) {
-	headers := http.Header{"Location": []string{"http://localhost/123"}}
-	headers = http.Header{"Location": []string{""}}
-	expect(t, getIDFromLocationHeader(headers), "")
-	headers = http.Header{}
-	expect(t, getIDFromLocationHeader(headers), "")
-}
-
-func TestGetIDFromLocation(t *testing.T) {
-	expect(t, getIDFromLocation("http://localhost/123"), "123")
-	expect(t, getIDFromLocation(""), "")
 }
