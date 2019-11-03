@@ -1,6 +1,7 @@
 package bandwidth
 
 import (
+	"context"
 	"net/http"
 )
 
@@ -25,9 +26,9 @@ type AssociatedSipPeersResponse struct {
 }
 
 // GetAssociatedPeers returns the associated sippeers (aka locations) for the application.
-func (c *Client) GetAssociatedPeers(applicationID string) (*AssociatedSipPeersResponse, error) {
+func (c *Client) GetAssociatedPeers(ctx context.Context, applicationID string) (*AssociatedSipPeersResponse, error) {
 	path := c.AccountsEndpoint + "/applications/" + applicationID + "/associatedsippeers"
-	result, _, err := c.makeAccountsRequest(http.MethodGet, path, &AssociatedSipPeersResponse{})
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodGet, path, &AssociatedSipPeersResponse{})
 	if err != nil {
 		return nil, err
 	}
@@ -50,9 +51,9 @@ type SipPeerTelephoneNumbersResponse struct {
 }
 
 // GetTollFreeNumbers returns the toll-free numbers associated with the site.
-func (c *Client) GetTollFreeNumbers(siteID, peerID string) (*SipPeerTelephoneNumbersResponse, error) {
+func (c *Client) GetTollFreeNumbers(ctx context.Context, siteID, peerID string) (*SipPeerTelephoneNumbersResponse, error) {
 	path := c.AccountsEndpoint + "/sites/" + siteID + "/sippeers/" + peerID + "/tns"
-	result, _, err := c.makeAccountsRequest(http.MethodGet, path, &SipPeerTelephoneNumbersResponse{})
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodGet, path, &SipPeerTelephoneNumbersResponse{})
 	if err != nil {
 		return nil, err
 	}

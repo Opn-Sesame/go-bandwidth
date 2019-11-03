@@ -1,6 +1,7 @@
 package bandwidth
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/textproto"
@@ -39,7 +40,7 @@ func TestNewFail(t *testing.T) {
 func TestCreateRequest(t *testing.T) {
 	endpoint := "https://localhost"
 	api := getAPI(endpoint)
-	req, err := api.createRequest(http.MethodGet, endpoint+"/v2/test", messagingRequest)
+	req, err := api.createRequest(context.Background(), http.MethodGet, endpoint+"/v2/test", messagingRequest)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +55,7 @@ func TestCreateRequestFail(t *testing.T) {
 	endpoint := "https://localhost"
 	api := getAPI(endpoint)
 	shouldFail(t, func() (interface{}, error) {
-		return api.createRequest("invalid\n\r\tmethod", "invalid:/\n/ url = ", messagingRequest)
+		return api.createRequest(context.Background(), "invalid\n\r\tmethod", "invalid:/\n/ url = ", messagingRequest)
 	})
 }
 
@@ -114,7 +115,7 @@ func TestMakeRequest(t *testing.T) {
 		PathAndQuery:  fmt.Sprintf("/api/v2/users/%s/messages", testAccountID),
 		ContentToSend: `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeMessagingRequest(http.MethodGet, api.MessagingEndpoint, map[string]interface{}{})
+	result, _, _ := api.makeMessagingRequest(context.Background(), http.MethodGet, api.MessagingEndpoint, map[string]interface{}{})
 	expect(t, result.(map[string]interface{})["test"], "test")
 }
 
@@ -123,7 +124,7 @@ func TestMakeRequestWithQuery(t *testing.T) {
 		PathAndQuery:  fmt.Sprintf("/api/v2/users/%s/messages?field1=value1&field2=value+with+space", testAccountID),
 		ContentToSend: `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeMessagingRequest(http.MethodGet, api.MessagingEndpoint, nil, map[string]string{
+	result, _, _ := api.makeMessagingRequest(context.Background(), http.MethodGet, api.MessagingEndpoint, nil, map[string]string{
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
@@ -137,7 +138,7 @@ func TestMakeRequestWithBody(t *testing.T) {
 		EstimatedContent: `{"field1":"value1","field2":"value with space"}`,
 		ContentToSend:    `{"test": "test"}`}})
 	defer server.Close()
-	result, _, _ := api.makeMessagingRequest(http.MethodPost, api.MessagingEndpoint, nil, map[string]interface{}{
+	result, _, _ := api.makeMessagingRequest(context.Background(), http.MethodPost, api.MessagingEndpoint, nil, map[string]interface{}{
 		"field1": "value1",
 		"field2": "value with space"})
 	expect(t, result.(map[string]interface{})["test"], "test")
@@ -149,6 +150,6 @@ func TestMakeRequestWithEmptyResponse(t *testing.T) {
 		Method:        http.MethodGet,
 		ContentToSend: ""}})
 	defer server.Close()
-	result, _, _ := api.makeMessagingRequest(http.MethodGet, api.MessagingEndpoint, &[]interface{}{})
+	result, _, _ := api.makeMessagingRequest(context.Background(), http.MethodGet, api.MessagingEndpoint, &[]interface{}{})
 	expect(t, len(*result.(*[]interface{})), 0)
 }

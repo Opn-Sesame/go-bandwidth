@@ -1,6 +1,7 @@
 package bandwidth
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -25,7 +26,7 @@ func TestGetAssociatedPeers(t *testing.T) {
 				</AssociatedSipPeers>
 			</AssociatedSipPeersResponse>`, siteID, peerID)}})
 	defer server.Close()
-	result, err := api.GetAssociatedPeers(testApplicationID)
+	result, err := api.GetAssociatedPeers(context.Background(), testApplicationID)
 	if err != nil {
 		t.Errorf("Failed call of GetAssociatedPeers(): %v", err)
 		return
@@ -41,7 +42,7 @@ func TestGetAssociatedPeersFail(t *testing.T) {
 		Method:           http.MethodGet,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	shouldFail(t, func() (interface{}, error) { return api.GetAssociatedPeers(testApplicationID) })
+	shouldFail(t, func() (interface{}, error) { return api.GetAssociatedPeers(context.Background(), testApplicationID) })
 }
 
 func TestGetTollFreeNumbers(t *testing.T) {
@@ -63,7 +64,7 @@ func TestGetTollFreeNumbers(t *testing.T) {
 				</SipPeerTelephoneNumbers>
 			</SipPeerTelephoneNumbersResponse>`, testAccountID, siteID, peerID, number)}})
 	defer server.Close()
-	result, err := api.GetTollFreeNumbers(siteID, peerID)
+	result, err := api.GetTollFreeNumbers(context.Background(), siteID, peerID)
 	if err != nil {
 		t.Errorf("Failed call of GetAssociatedPeers(): %v", err)
 		return
@@ -80,5 +81,5 @@ func TestGetTollFreeNumbersFail(t *testing.T) {
 		Method:           http.MethodGet,
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
-	shouldFail(t, func() (interface{}, error) { return api.GetTollFreeNumbers(siteID, peerID) })
+	shouldFail(t, func() (interface{}, error) { return api.GetTollFreeNumbers(context.Background(), siteID, peerID) })
 }

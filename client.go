@@ -2,6 +2,7 @@ package bandwidth
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -44,8 +45,8 @@ type Opts struct {
 	// mandatory options.
 	AccountID, APIToken, APISecret, UserName, Password string
 	//optional
-	AccountsEndpoint, MessagingEndpoint                string
-	HTTPClient                                         *http.Client
+	AccountsEndpoint, MessagingEndpoint string
+	HTTPClient                          *http.Client
 }
 
 // Client is main API object
@@ -58,7 +59,7 @@ type Client struct {
 // New creates new instances of api
 // It returns Client instance. Use it to make API calls.
 func New(opts Opts) (*Client, error) {
-	if opts.AccountID == "" || opts.APIToken == "" || opts.APISecret == "" || 
+	if opts.AccountID == "" || opts.APIToken == "" || opts.APISecret == "" ||
 		opts.UserName == "" || opts.Password == "" {
 		return nil, errors.New("missing auth data")
 	}
@@ -78,15 +79,15 @@ func New(opts Opts) (*Client, error) {
 		client = opts.HTTPClient
 	}
 
-	c := &Client{accountID: opts.AccountID, apiToken: opts.APIToken, apiSecret: opts.APISecret, 
+	c := &Client{accountID: opts.AccountID, apiToken: opts.APIToken, apiSecret: opts.APISecret,
 		userName: opts.UserName, password: opts.Password,
 		AccountsEndpoint:  accounts + accountsPath + opts.AccountID,
 		MessagingEndpoint: messaging + messagingPath + opts.AccountID + "/messages", httpClient: client}
 	return c, nil
 }
 
-func (c *Client) createRequest(method, path string, requestType endpointRequest) (*http.Request, error) {
-	request, err := http.NewRequest(method, path, nil)
+func (c *Client) createRequest(ctx context.Context, method, path string, requestType endpointRequest) (*http.Request, error) {
+	request, err := http.NewRequestWithContext(ctx, method, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -170,8 +171,8 @@ func (c *Client) checkXMLResponse(response *http.Response, responseBody interfac
 	return nil, nil, fmt.Errorf("Http code %d", response.StatusCode)
 }
 
-func (c *Client) makeRequestInternal(method, path string, requestType endpointRequest, data ...interface{}) (interface{}, http.Header, error) {
-	request, err := c.createRequest(method, path, requestType)
+func (c *Client) makeRequestInternal(ctx context.Context, method, path string, requestType endpointRequest, data ...interface{}) (interface{}, http.Header, error) {
+	request, err := c.createRequest(ctx, method, path, requestType)
 	var responseBody interface{}
 	if err != nil {
 		return nil, nil, err
@@ -233,12 +234,12 @@ func (c *Client) makeRequestInternal(method, path string, requestType endpointRe
 	}
 }
 
-func (c *Client) makeMessagingRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
-	return c.makeRequestInternal(method, path, messagingRequest, data...)
+func (c *Client) makeMessagingRequest(ctx context.Context, method, path string, data ...interface{}) (interface{}, http.Header, error) {
+	return c.makeRequestInternal(ctx, method, path, messagingRequest, data...)
 }
 
-func (c *Client) makeAccountsRequest(method, path string, data ...interface{}) (interface{}, http.Header, error) {
-	return c.makeRequestInternal(method, path, accountsRequest, data...)
+func (c *Client) makeAccountsRequest(ctx context.Context, method, path string, data ...interface{}) (interface{}, http.Header, error) {
+	return c.makeRequestInternal(ctx, method, path, accountsRequest, data...)
 }
 
 type nopCloser struct {

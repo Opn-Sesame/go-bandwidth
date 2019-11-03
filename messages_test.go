@@ -1,6 +1,7 @@
 package bandwidth
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -31,7 +32,7 @@ func TestCreateMessage(t *testing.T) {
 			"segmentCount"  : 1
 		  }`}})
 	defer server.Close()
-	message, err := api.CreateMessage(&CreateMessage{From: "fromNumber", To: "toNumber", Text: "text"})
+	message, err := api.CreateMessage(context.Background(), &CreateMessage{From: "fromNumber", To: "toNumber", Text: "text"})
 	if err != nil {
 		t.Error("Failed call of CreateMessage()")
 		return
@@ -50,6 +51,6 @@ func TestCreateMessageV2Fail(t *testing.T) {
 		StatusCodeToSend: http.StatusBadRequest}})
 	defer server.Close()
 	shouldFail(t, func() (interface{}, error) {
-		return api.CreateMessage(&CreateMessage{From: "fromNumber", To: "toNumber", Text: "text"})
+		return api.CreateMessage(context.Background(), &CreateMessage{From: "fromNumber", To: "toNumber", Text: "text"})
 	})
 }

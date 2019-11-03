@@ -1,6 +1,7 @@
 package bandwidth
 
 import (
+	"context"
 	"net/http"
 	"time"
 )
@@ -30,8 +31,8 @@ type CreateMessageResponse struct {
 }
 
 // CreateMessageV2 sends a message (SMS/MMS)
-func (c *Client) CreateMessage(data *CreateMessage) (*CreateMessageResponse, error) {
-	result, _, err := c.makeMessagingRequest(http.MethodPost, c.MessagingEndpoint, &CreateMessageResponse{}, data)
+func (c *Client) CreateMessage(ctx context.Context, data *CreateMessage) (*CreateMessageResponse, error) {
+	result, _, err := c.makeMessagingRequest(ctx,http.MethodPost, c.MessagingEndpoint, &CreateMessageResponse{}, data)
 	if err != nil {
 		return nil, err
 	}
