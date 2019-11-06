@@ -213,12 +213,21 @@ func (c *Client) makeRequestInternal(ctx context.Context, method, path string, r
 			}
 			request.URL.RawQuery = query.Encode()
 		} else {
-			request.Header.Set("Content-Type", "application/json")
-			rawJSON, err := json.Marshal(data[1])
-			if err != nil {
-				return nil, nil, err
+			var body []byte
+			var err error
+			switch requestType {
+			case messagingRequest:
+				request.Header.Set("Content-Type", "application/json")
+				body, err = json.Marshal(data[1])
+			default:
+				request.Header.Set("Content-Type", "application/xml")
+				body, err = xml.Marshal(data[1])
 			}
-			request.Body = nopCloser{bytes.NewReader(rawJSON)}
+				if err != nil {
+					return nil, nil, err
+				}
+				request.Body = nopCloser{bytes.NewReader(body)}
+
 		}
 	}
 	response, err := c.httpClient.Do(request)

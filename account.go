@@ -5,26 +5,6 @@ import (
 	"net/http"
 )
 
-// AssociatedSipPeer returns an associated sip-peer (aka location) with the app.
-type AssociatedSipPeer struct {
-	// SiteId is the ID of the site.
-	SiteID string `xml:"SiteId"`
-	// SiteName is the name of the site.
-	SiteName string
-	// PeerId is the ID of the peer. This is used alongside side-id to retrieve the actual numbers.
-	PeerID string `xml:"PeerId"`
-}
-
-// AssociatedSipPeers is a list of associated sip peers.
-type AssociatedSipPeers struct {
-	Associated []AssociatedSipPeer `xml:"AssociatedSipPeer"`
-}
-
-// AssociatedSipPeersResponse struct
-type AssociatedSipPeersResponse struct {
-	Peers AssociatedSipPeers `xml:"AssociatedSipPeers"`
-}
-
 // GetAssociatedPeers returns the associated sippeers (aka locations) for the application.
 func (c *Client) GetAssociatedPeers(ctx context.Context, applicationID string) (*AssociatedSipPeersResponse, error) {
 	path := c.AccountsEndpoint + "/applications/" + applicationID + "/associatedsippeers"
@@ -35,27 +15,62 @@ func (c *Client) GetAssociatedPeers(ctx context.Context, applicationID string) (
 	return result.(*AssociatedSipPeersResponse), nil
 }
 
-// SipPeerTelephoneNumber is the phone number.
-type SipPeerTelephoneNumber struct {
-	FullNumber string
-}
-
-// SipPeerTelephoneNumbers is a collection of phone numbers.
-type SipPeerTelephoneNumbers struct {
-	Numbers []SipPeerTelephoneNumber `xml:"SipPeerTelephoneNumber"`
-}
-
-// SipPeerTelephoneNumbersResponse is the response to fetching sip-peers.
-type SipPeerTelephoneNumbersResponse struct {
-	Peers SipPeerTelephoneNumbers `xml:"SipPeerTelephoneNumbers"`
-}
-
-// GetTollFreeNumbers returns the toll-free numbers associated with the site.
-func (c *Client) GetTollFreeNumbers(ctx context.Context, siteID, peerID string) (*SipPeerTelephoneNumbersResponse, error) {
+// GetNumbers returns the toll-free numbers associated with the site.
+func (c *Client) GetNumbers(ctx context.Context, siteID, peerID string) (*SipPeerTelephoneNumbersResponse, error) {
 	path := c.AccountsEndpoint + "/sites/" + siteID + "/sippeers/" + peerID + "/tns"
 	result, _, err := c.makeAccountsRequest(ctx, http.MethodGet, path, &SipPeerTelephoneNumbersResponse{})
 	if err != nil {
 		return nil, err
 	}
 	return result.(*SipPeerTelephoneNumbersResponse), nil
+}
+
+// OrderNumbersByAreaCode purchases n numbers given area-code.
+func (c *Client) OrderNumbersByAreaCode(ctx context.Context, siteID, peerID, areaCode string, n int) (*OrderResponse, error) {
+	path := c.AccountsEndpoint + "/orders"
+	req := AreaCodeRequest{
+		AreaCodeOrder: AreaCodeOrder {
+			SiteID: siteID,
+			PeerID: peerID,
+			AreaCodeSearchAndOrderType: AreaCodeSearchAndOrderType{
+				Quantity: n,
+				AreaCode: areaCode,
+			},
+		},
+	}
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodPost, path, &OrderResponse{}, &req)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*OrderResponse), nil
+}
+
+// OrderTollFreeNumbers purchases n numbers given toll-free mask.
+func (c *Client) OrderTollFreeNumbers(ctx context.Context, siteID, peerID, mask string, n int) (*OrderResponse, error) {
+	path := c.AccountsEndpoint + "/orders"
+	req := TollFreeOrderRequest{
+		TollFreeOrder: TollFreeOrder{
+			SiteID: siteID,
+			PeerID: peerID,
+			TollFreeWildCharSearchAndOrderType: TollFreeWildCharSearchAndOrderType{
+				Quantity:                n,
+				TollFreeWildCardPattern: mask,
+			},
+		},
+	}
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodPost, path, &OrderResponse{}, &req)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*OrderResponse), nil
+}
+
+// GetOrder returns information regarding the given order.
+func (c *Client) GetOrder(ctx context.Context, id string) (*OrderResponse, error) {
+	path := c.AccountsEndpoint + "/orders/" + id
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodGet, path, &OrderResponse{})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*OrderResponse), nil
 }
