@@ -170,7 +170,7 @@ func TestGetTollFreeOrder(t *testing.T) {
 		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 		<OrderResponse>
 			<CompletedQuantity>1</CompletedQuantity>
-			<CreatedByUser>bashar@opnsesame.com</CreatedByUser>
+			<CreatedByUser>foo@bar.com</CreatedByUser>
 			<LastModifiedDate>2019-11-05T15:04:50.531Z</LastModifiedDate>
 			<OrderCompleteDate>2019-11-05T15:04:50.531Z</OrderCompleteDate>
 			<Order>
@@ -219,7 +219,7 @@ func TestGetOrderByAreaCode(t *testing.T) {
 		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 		<OrderResponse>
 			<CompletedQuantity>1</CompletedQuantity>
-			<CreatedByUser>bashar@opnsesame.com</CreatedByUser>
+			<CreatedByUser>foo@bar.com</CreatedByUser>
 			<LastModifiedDate>2019-11-05T13:48:43.379Z</LastModifiedDate>
 			<OrderCompleteDate>2019-11-05T13:48:43.379Z</OrderCompleteDate>
 			<Order>
