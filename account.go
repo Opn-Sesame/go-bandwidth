@@ -2,8 +2,78 @@ package bandwidth
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 )
+
+// CreatePeer creates the Sip peer and returns its ID.
+func (c *Client) CreatePeer(ctx context.Context, applicationID, siteID, peerName string, isDefault bool) (string, error) {
+	path := c.AccountsEndpoint + "/sites/" + siteID + "/sippeers"
+	sipPeer := SipPeer{
+		PeerName:      peerName,
+		IsDefaultPeer: isDefault,
+	}
+	_, headers, err := c.makeAccountsRequest(ctx, http.MethodPost, path, nil, &sipPeer)
+	if err != nil {
+		return "", err
+	}
+	splitted := strings.Split(headers.Get("Location"), "/sites/"+siteID+"/sippeers/")
+	if len(splitted) != 2 {
+		return "", fmt.Errorf("unknown peer ID: %v", headers.Get("Location"))
+	}
+	return splitted[1], nil
+}
+
+// EnableSMS enables SMS
+func (c *Client) EnableSMS(ctx context.Context, siteID, peerID string) (*SipPeerSmsFeatureResponse, error) {
+	path := c.AccountsEndpoint + "/sites/" + siteID + "/sippeers/" + peerID + "/products/messaging/features/sms"
+	feature := SipPeerSmsFeature{
+		SipPeerSmsFeatureSettings: SipPeerSmsFeatureSettings{
+			TollFree:    true,
+			ShortCode:   true,
+			Protocol:    "HTTP",
+			Zone1:       true,
+			A2pLongCode: "DefaultOff",
+		},
+	}
+
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodPost, path, &SipPeerSmsFeatureResponse{}, &feature)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*SipPeerSmsFeatureResponse), nil
+}
+
+// EnableMMS enables MMS
+func (c *Client) EnableMMS(ctx context.Context, siteID, peerID string) (*MmsFeatureResponse, error) {
+	path := c.AccountsEndpoint + "/sites/" + siteID + "/sippeers/" + peerID + "/products/messaging/features/mms"
+	feature := MmsFeature{
+		MmsSettings: MmsSettings{
+			Protocol: "HTTP",
+		},
+	}
+
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodPost, path, &MmsFeatureResponse{}, &feature)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*MmsFeatureResponse), nil
+}
+
+// AssociateApplication associates the peer with the application.
+func (c *Client) AssociateApplication(ctx context.Context, siteID, peerID, applicationID string) (*ApplicationsSettingsResponse, error) {
+	path := c.AccountsEndpoint + "/sites/" + siteID + "/sippeers/" + peerID + "/products/messaging/applicationSettings"
+	req := ApplicationsSettings{
+		HttpMessagingV2AppId: applicationID,
+	}
+
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodPut, path, &ApplicationsSettingsResponse{}, &req)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*ApplicationsSettingsResponse), nil
+}
 
 // GetAssociatedPeers returns the associated sippeers (aka locations) for the application.
 func (c *Client) GetAssociatedPeers(ctx context.Context, applicationID string) (*AssociatedSipPeersResponse, error) {
@@ -29,7 +99,7 @@ func (c *Client) GetNumbers(ctx context.Context, siteID, peerID string) (*SipPee
 func (c *Client) OrderNumbersByAreaCode(ctx context.Context, siteID, peerID, areaCode string, n int) (*OrderResponse, error) {
 	path := c.AccountsEndpoint + "/orders"
 	req := AreaCodeRequest{
-		AreaCodeOrder: AreaCodeOrder {
+		AreaCodeOrder: AreaCodeOrder{
 			SiteID: siteID,
 			PeerID: peerID,
 			AreaCodeSearchAndOrderType: AreaCodeSearchAndOrderType{

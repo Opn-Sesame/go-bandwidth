@@ -40,6 +40,62 @@ type SipPeerTelephoneNumbersResponse struct {
 	Peers SipPeerTelephoneNumbers `xml:"SipPeerTelephoneNumbers"`
 }
 
+type SipPeer struct {
+	PeerName      string
+	Description   string
+	IsDefaultPeer bool
+}
+
+type HttpSettings struct {
+	ProxyPeerId int `xml:",omitempty"`
+}
+
+type SipPeerSmsFeatureSettings struct {
+	TollFree    bool
+	ShortCode   bool
+	A2pLongCode string // DefaultOff?
+	Protocol    string // HTTP
+	Zone1       bool
+	Zone2       bool
+	Zone3       bool
+	Zone4       bool
+	Zone5       bool
+}
+type SipPeerSmsFeature struct {
+	SipPeerSmsFeatureSettings SipPeerSmsFeatureSettings
+	HttpSettings              HttpSettings
+}
+
+type SipPeerSmsFeatureResponse struct {
+	SipPeerSmsFeature SipPeerSmsFeature
+}
+
+type MmsSettings struct {
+	Protocol string
+}
+type HTTPProtocol struct {
+	HttpSettings HttpSettings
+}
+type Protocols struct {
+	HTTP HTTPProtocol
+}
+type MmsFeature struct {
+	MmsSettings MmsSettings
+	Protocols   Protocols
+}
+
+type MmsFeatureResponse struct {
+	MmsFeature MmsFeature
+}
+
+type ApplicationsSettings struct {
+	HttpMessagingV2AppId string
+}
+
+type ApplicationsSettingsResponse struct {
+	ApplicationsSettings ApplicationsSettings
+}
+
 type OrderRequest struct {
 	Name           string
 	SiteID         string `xml:"SiteId"`
@@ -56,10 +112,6 @@ type AreaCodeOrder struct {
 	AreaCodeSearchAndOrderType AreaCodeSearchAndOrderType
 }
 
-/*
-<OrderResponse><Order><OrderCreateDate>2019-11-05T13:48:43.238Z</OrderCreateDate><PeerId>596135</PeerId><BackOrderRequested>false</BackOrderRequested><id>983d1b3a-0698-4c47-bb87-c455b3fbf4ca</id><AreaCodeSearchAndOrderType><AreaCode>734</AreaCode><Quantity>1</Quantity></AreaCodeSearchAndOrderType><PartialAllowed>true</PartialAllowed><SiteId>27161</SiteId></Order><OrderStatus>RECEIVED</OrderStatus></OrderResponse>
-
-*/
 type OrderResponseOrder struct {
 	OrderCreated               time.Time
 	PeerID                     string `xml:"PeerId"`
@@ -104,6 +156,7 @@ type TollFreeOrder struct {
 	CustomerOrderID                    string `xml:"CustomerOrderId,omitempty"`
 	TollFreeWildCharSearchAndOrderType TollFreeWildCharSearchAndOrderType
 }
+
 type TollFreeOrderRequest struct {
 	XMLName xml.Name `xml:"Order"`
 	TollFreeOrder

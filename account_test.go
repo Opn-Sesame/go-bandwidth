@@ -7,6 +7,120 @@ import (
 	"testing"
 )
 
+func TestEnableMMS(t *testing.T) {
+	siteID := "12345"
+	peerID := "123123"
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:     fmt.Sprintf("%s%s/sites/%s/sippeers/%s/products/messaging/features/mms", accountsPath, testAccountID, siteID, peerID),
+		Method:           http.MethodPost,
+		EstimatedContent: fmt.Sprintf(`<MmsFeature><MmsSettings><Protocol>HTTP</Protocol></MmsSettings><Protocols><HTTP><HttpSettings></HttpSettings></HTTP></Protocols></MmsFeature>`),
+		ContentToSend: fmt.Sprintf(`
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+		<MmsFeatureResponse>
+			<MmsFeature>
+				<MmsSettings>
+					<Protocol>HTTP</Protocol>
+				</MmsSettings>
+				<Protocols>
+					<HTTP>
+						<HttpSettings>
+							<ProxyPeerId>1234</ProxyPeerId>
+						</HttpSettings>
+					</HTTP>
+				</Protocols>
+			</MmsFeature>
+		</MmsFeatureResponse>`)}})
+	defer server.Close()
+	result, err := api.EnableMMS(context.Background(), siteID, peerID)
+	if err != nil {
+		t.Errorf("Failed call of EnableMMS(): %v", err)
+		return
+	}
+	expect(t, result.MmsFeature.Protocols.HTTP.HttpSettings.ProxyPeerId, 1234)
+}
+
+func TestEnableSMS(t *testing.T) {
+	siteID := "12345"
+	peerID := "123123"
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:     fmt.Sprintf("%s%s/sites/%s/sippeers/%s/products/messaging/features/sms", accountsPath, testAccountID, siteID, peerID),
+		Method:           http.MethodPost,
+		EstimatedContent: fmt.Sprintf(`<SipPeerSmsFeature><SipPeerSmsFeatureSettings><TollFree>true</TollFree><ShortCode>true</ShortCode><A2pLongCode>DefaultOff</A2pLongCode><Protocol>HTTP</Protocol><Zone1>true</Zone1><Zone2>false</Zone2><Zone3>false</Zone3><Zone4>false</Zone4><Zone5>false</Zone5></SipPeerSmsFeatureSettings><HttpSettings></HttpSettings></SipPeerSmsFeature>`),
+		ContentToSend: fmt.Sprintf(`
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+		<SipPeerSmsFeatureResponse>
+			<SipPeerSmsFeature>
+				<SipPeerSmsFeatureSettings>
+					<TollFree>true</TollFree>
+					<ShortCode>true</ShortCode>
+					<A2pLongCode>DefaultOff</A2pLongCode>
+					<Protocol>HTTP</Protocol>
+					<Zone1>true</Zone1>
+					<Zone2>false</Zone2>
+					<Zone3>false</Zone3>
+					<Zone4>false</Zone4>
+					<Zone5>false</Zone5>
+				</SipPeerSmsFeatureSettings>
+				<HttpSettings>
+					<ProxyPeerId>1234</ProxyPeerId>
+				</HttpSettings>
+			</SipPeerSmsFeature>
+		</SipPeerSmsFeatureResponse>`)}})
+	defer server.Close()
+	result, err := api.EnableSMS(context.Background(), siteID, peerID)
+	if err != nil {
+		t.Errorf("Failed call of EnableSMS(): %v", err)
+		return
+	}
+	expect(t, result.SipPeerSmsFeature.SipPeerSmsFeatureSettings.TollFree, true)
+}
+
+func TestAssociateApplication(t *testing.T) {
+	siteID := "12345"
+	peerID := "123123"
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery:     fmt.Sprintf("%s%s/sites/%s/sippeers/%s/products/messaging/applicationSettings", accountsPath, testAccountID, siteID, peerID),
+		Method:           http.MethodPut,
+		EstimatedContent: fmt.Sprintf(`<ApplicationsSettings><HttpMessagingV2AppId>%s</HttpMessagingV2AppId></ApplicationsSettings>`, testApplicationID),
+		ContentToSend: fmt.Sprintf(`
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+		<ApplicationsSettingsResponse>
+			<ApplicationsSettings>
+				<HttpMessagingV2AppId>%s</HttpMessagingV2AppId>
+			</ApplicationsSettings>
+		</ApplicationsSettingsResponse>`, testApplicationID)}})
+	defer server.Close()
+	result, err := api.AssociateApplication(context.Background(), siteID, peerID, testApplicationID)
+	if err != nil {
+		t.Errorf("Failed call of AssociateApplication(): %v", err)
+		return
+	}
+	expect(t, result.ApplicationsSettings.HttpMessagingV2AppId, testApplicationID)
+}
+
+func TestCreatePeer(t *testing.T) {
+	siteID := "12345"
+	peerID := "678"
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery: fmt.Sprintf("%s%s/sites/%s/sippeers", accountsPath, testAccountID, siteID),
+		Method:       http.MethodPost,
+		HeadersToSend: map[string]string{
+			"Location": fmt.Sprintf("https://dashboard.bandwidth.com:443/v1.0/accounts/%s/sites/%s/sippeers/%s",
+				testAccountID,
+				siteID,
+				peerID),
+		},
+		ContentToSend: "",
+	}})
+	defer server.Close()
+	result, err := api.CreatePeer(context.Background(), testAccountID, siteID, "test peer", false)
+	if err != nil {
+		t.Errorf("Failed call of CreatePeer(): %v", err)
+		return
+	}
+	expect(t, result, peerID)
+}
+
 func TestGetAssociatedPeers(t *testing.T) {
 	siteID := "12345"
 	peerID := "123123"
@@ -66,7 +180,7 @@ func TestGetNumbers(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetNumbers(context.Background(), siteID, peerID)
 	if err != nil {
-		t.Errorf("Failed call of GetAssociatedPeers(): %v", err)
+		t.Errorf("Failed call of GetNumbers(): %v", err)
 		return
 	}
 	expect(t, len(result.Peers.Numbers), 1)
@@ -91,8 +205,8 @@ func TestOrderNumbersByAreaCode(t *testing.T) {
 	areaCode := "734"
 	quantity := 1
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: fmt.Sprintf("%s%s/orders", accountsPath, testAccountID),
-		Method:       http.MethodPost,
+		PathAndQuery:     fmt.Sprintf("%s%s/orders", accountsPath, testAccountID),
+		Method:           http.MethodPost,
 		EstimatedContent: fmt.Sprintf("<Order><SiteId>%s</SiteId><PeerId>%s</PeerId><PartialAllowed>false</PartialAllowed><AreaCodeSearchAndOrderType><AreaCode>%s</AreaCode><Quantity>%d</Quantity></AreaCodeSearchAndOrderType></Order>", siteID, peerID, areaCode, quantity),
 		ContentToSend: fmt.Sprintf(`
 		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -127,8 +241,8 @@ func TestOrderTollFreeNumbers(t *testing.T) {
 	mask := "8**"
 	quantity := 1
 	server, api := startMockServer(t, []RequestHandler{RequestHandler{
-		PathAndQuery: fmt.Sprintf("%s%s/orders", accountsPath, testAccountID),
-		Method:       http.MethodPost,
+		PathAndQuery:     fmt.Sprintf("%s%s/orders", accountsPath, testAccountID),
+		Method:           http.MethodPost,
 		EstimatedContent: fmt.Sprintf("<Order><SiteId>%s</SiteId><PeerId>%s</PeerId><PartialAllowed>false</PartialAllowed><TollFreeWildCharSearchAndOrderType><TollFreeWildCardPattern>%s</TollFreeWildCardPattern><Quantity>%d</Quantity></TollFreeWildCharSearchAndOrderType></Order>", siteID, peerID, mask, quantity),
 		ContentToSend: fmt.Sprintf(`
 		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -196,7 +310,7 @@ func TestGetTollFreeOrder(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetOrder(context.Background(), id)
 	if err != nil {
-		t.Errorf("Failed call of OrderNumbersByAreaCode(): %v", err)
+		t.Errorf("Failed call of GetOrder(): %v", err)
 		return
 	}
 	expect(t, result.OrderStatus, "COMPLETE")
@@ -245,7 +359,7 @@ func TestGetOrderByAreaCode(t *testing.T) {
 	defer server.Close()
 	result, err := api.GetOrder(context.Background(), id)
 	if err != nil {
-		t.Errorf("Failed call of OrderNumbersByAreaCode(): %v", err)
+		t.Errorf("Failed call of GetOrder(): %v", err)
 		return
 	}
 	expect(t, result.OrderStatus, "COMPLETE")
