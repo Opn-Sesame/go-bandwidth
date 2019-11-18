@@ -38,7 +38,7 @@ func shouldFail(t *testing.T, action func() (interface{}, error)) error {
 }
 
 func getAPI(endpoint string) *Client {
-	api, _ := New(Opts{testAccountID, "apiToken", "apiSecret", "test", "password", endpoint, endpoint, nil})
+	api, _ := New(Opts{testAccountID, "apiToken", "apiSecret", "test", "password", endpoint, endpoint, nil, true})
 	return api
 }
 

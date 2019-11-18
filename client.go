@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -47,6 +48,7 @@ type Opts struct {
 	//optional
 	AccountsEndpoint, MessagingEndpoint string
 	HTTPClient                          *http.Client
+	Verbose                             bool
 }
 
 // Client is main API object
@@ -54,6 +56,7 @@ type Client struct {
 	accountID, apiToken, apiSecret, userName, password string
 	AccountsEndpoint, MessagingEndpoint                string
 	httpClient                                         *http.Client
+	verbose                                            bool
 }
 
 // New creates new instances of api
@@ -82,7 +85,8 @@ func New(opts Opts) (*Client, error) {
 	c := &Client{accountID: opts.AccountID, apiToken: opts.APIToken, apiSecret: opts.APISecret,
 		userName: opts.UserName, password: opts.Password,
 		AccountsEndpoint:  accounts + accountsPath + opts.AccountID,
-		MessagingEndpoint: messaging + messagingPath + opts.AccountID + "/messages", httpClient: client}
+		MessagingEndpoint: messaging + messagingPath + opts.AccountID + "/messages", httpClient: client,
+		verbose: opts.Verbose}
 	return c, nil
 }
 
@@ -223,16 +227,30 @@ func (c *Client) makeRequestInternal(ctx context.Context, method, path string, r
 				request.Header.Set("Content-Type", "application/xml")
 				body, err = xml.Marshal(data[1])
 			}
-				if err != nil {
-					return nil, nil, err
-				}
-				request.Body = nopCloser{bytes.NewReader(body)}
+			if err != nil {
+				return nil, nil, err
+			}
+			request.Body = nopCloser{bytes.NewReader(body)}
 
 		}
+	}
+	if c.verbose {
+		dump, err := httputil.DumpRequestOut(request, true)
+		if err != nil {
+			return nil, nil, err
+		}
+		fmt.Printf("%q", dump)
 	}
 	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return nil, nil, err
+	}
+	if c.verbose {
+		dump, err := httputil.DumpResponse(response, true)
+		if err != nil {
+			return nil, nil, err
+		}
+		fmt.Printf("%q", dump)
 	}
 
 	switch requestType {
