@@ -239,7 +239,7 @@ func (c *Client) makeRequestInternal(ctx context.Context, method, path string, r
 		if err != nil {
 			return nil, nil, err
 		}
-		fmt.Printf("%q", dump)
+		fmt.Printf("%q\n", dump)
 	}
 	response, err := c.httpClient.Do(request)
 	if err != nil {
@@ -250,7 +250,7 @@ func (c *Client) makeRequestInternal(ctx context.Context, method, path string, r
 		if err != nil {
 			return nil, nil, err
 		}
-		fmt.Printf("%q", dump)
+		fmt.Printf("%q\n", dump)
 	}
 
 	switch requestType {
