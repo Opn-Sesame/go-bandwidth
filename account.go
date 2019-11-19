@@ -31,7 +31,7 @@ func (c *Client) EnableSMS(ctx context.Context, siteID, peerID string) (*SipPeer
 	feature := SipPeerSmsFeature{
 		SipPeerSmsFeatureSettings: SipPeerSmsFeatureSettings{
 			TollFree:    true,
-			ShortCode:   true,
+			ShortCode:   false,
 			Protocol:    "HTTP",
 			Zone1:       true,
 			A2pLongCode: "DefaultOff",
