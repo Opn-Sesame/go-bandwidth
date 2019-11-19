@@ -30,9 +30,9 @@ type CreateMessageResponse struct {
 	SegmentCount  int32       `json:"segmentCount"`
 }
 
-// CreateMessageV2 sends a message (SMS/MMS)
+// CreateMessage sends a message (SMS/MMS)
 func (c *Client) CreateMessage(ctx context.Context, data *CreateMessage) (*CreateMessageResponse, error) {
-	result, _, err := c.makeMessagingRequest(ctx,http.MethodPost, c.MessagingEndpoint, &CreateMessageResponse{}, data)
+	result, _, err := c.makeMessagingRequest(ctx, http.MethodPost, c.MessagingEndpoint, &CreateMessageResponse{}, data)
 	if err != nil {
 		return nil, err
 	}

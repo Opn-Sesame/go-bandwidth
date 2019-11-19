@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -115,6 +116,20 @@ func (c *Client) OrderNumbersByAreaCode(ctx context.Context, siteID, peerID, are
 	return result.(*OrderResponse), nil
 }
 
+// SearchNumbersByAreaCode finds n numbers given area-code.
+func (c *Client) SearchNumbersByAreaCode(ctx context.Context, areaCode string, n int) (*SearchResult, error) {
+	path := c.AccountsEndpoint + "/availableNumbers"
+	params := map[string]string{
+		"areaCode": areaCode,
+		"quantity": strconv.Itoa(n),
+	}
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodGet, path, &SearchResult{}, params)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*SearchResult), nil
+}
+
 // OrderTollFreeNumbers purchases n numbers given toll-free mask.
 func (c *Client) OrderTollFreeNumbers(ctx context.Context, siteID, peerID, mask string, n int) (*OrderResponse, error) {
 	path := c.AccountsEndpoint + "/orders"
@@ -133,6 +148,20 @@ func (c *Client) OrderTollFreeNumbers(ctx context.Context, siteID, peerID, mask 
 		return nil, err
 	}
 	return result.(*OrderResponse), nil
+}
+
+// SearchTollFreeNumbers finds n numbers given tollfree mask.
+func (c *Client) SearchTollFreeNumbers(ctx context.Context, mask string, n int) (*SearchResult, error) {
+	path := c.AccountsEndpoint + "/availableNumbers"
+	params := map[string]string{
+		"tollFreeWildCardPattern": mask,
+		"quantity":                strconv.Itoa(n),
+	}
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodGet, path, &SearchResult{}, params)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*SearchResult), nil
 }
 
 // GetOrder returns information regarding the given order.

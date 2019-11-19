@@ -93,7 +93,7 @@ func startMockServer(t *testing.T, handlers []RequestHandler) (*httptest.Server,
 				return
 			}
 		}
-		t.Logf("Unhandled request %s %s", r.Method, r.URL.String())
+		t.Logf("Unhandled request %s %s, handlers: \n%+v\n", r.Method, r.URL.String(), handlers)
 		w.WriteHeader(http.StatusNotFound)
 	}))
 	api := getAPI(mockServer.URL)

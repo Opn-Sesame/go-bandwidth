@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
+	"sort"
 	"testing"
 )
 
@@ -365,4 +367,68 @@ func TestGetOrderByAreaCode(t *testing.T) {
 	expect(t, result.OrderStatus, "COMPLETE")
 	expect(t, result.Order.PeerID, peerID)
 	expect(t, result.CompletedNumbers.TelephoneNumbers[0].FullNumber, number)
+}
+
+func TestSearchNumbersByAreaCode(t *testing.T) {
+	areaCode := "510"
+	numbers := []string{"5101231234", "5101234567"}
+	sort.Strings(numbers)
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery: fmt.Sprintf("%s%s/availableNumbers?areaCode=%s&quantity=%d", accountsPath, testAccountID, areaCode, len(numbers)),
+		Method:       http.MethodGet,
+		ContentToSend: fmt.Sprintf(`
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+		<SearchResult>
+			<ResultCount>%d</ResultCount>
+			<TelephoneNumberList>
+				<TelephoneNumber>%s</TelephoneNumber>
+				<TelephoneNumber>%s</TelephoneNumber>
+			</TelephoneNumberList>
+		</SearchResult>`, len(numbers), numbers[0], numbers[1])}})
+	defer server.Close()
+	result, err := api.SearchNumbersByAreaCode(context.Background(), areaCode, len(numbers))
+	if err != nil {
+		t.Errorf("Failed call of SearchNumbersByAreaCode(): %v", err)
+		return
+	}
+	expect(t, result.ResultCount, len(numbers))
+	expect(t, len(result.TelephoneNumberList.TelephoneNumber), len(numbers))
+	var found []string
+	for _, el := range result.TelephoneNumberList.TelephoneNumber {
+		found = append(found, el)
+	}
+	sort.Strings(found)
+	expect(t, found, numbers)
+}
+
+func TestSearchTollFreeNumbers(t *testing.T) {
+	mask := "8**"
+	numbers := []string{"8441231234", "8441234567"}
+	sort.Strings(numbers)
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery: fmt.Sprintf("%s%s/availableNumbers?quantity=%d&tollFreeWildCardPattern=%s", accountsPath, testAccountID, len(numbers), url.QueryEscape(mask)),
+		Method:       http.MethodGet,
+		ContentToSend: fmt.Sprintf(`
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+		<SearchResult>
+			<ResultCount>%d</ResultCount>
+			<TelephoneNumberList>
+				<TelephoneNumber>%s</TelephoneNumber>
+				<TelephoneNumber>%s</TelephoneNumber>
+			</TelephoneNumberList>
+		</SearchResult>`, len(numbers), numbers[0], numbers[1])}})
+	defer server.Close()
+	result, err := api.SearchTollFreeNumbers(context.Background(), mask, len(numbers))
+	if err != nil {
+		t.Errorf("Failed call of SearchTollFreeNumbers(): %v", err)
+		return
+	}
+	expect(t, result.ResultCount, len(numbers))
+	expect(t, len(result.TelephoneNumberList.TelephoneNumber), len(numbers))
+	var found []string
+	for _, el := range result.TelephoneNumberList.TelephoneNumber {
+		found = append(found, el)
+	}
+	sort.Strings(found)
+	expect(t, found, numbers)
 }

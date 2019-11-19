@@ -161,3 +161,11 @@ type TollFreeOrderRequest struct {
 	XMLName xml.Name `xml:"Order"`
 	TollFreeOrder
 }
+
+type TelephoneNumberList struct {
+	TelephoneNumber []string
+}
+type SearchResult struct {
+	ResultCount         int
+	TelephoneNumberList TelephoneNumberList
+}
