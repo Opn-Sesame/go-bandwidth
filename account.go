@@ -164,6 +164,23 @@ func (c *Client) SearchTollFreeNumbers(ctx context.Context, mask string, n int) 
 	return result.(*SearchResult), nil
 }
 
+// Disconnect disconnects the given phone numbers.
+func (c *Client) Disconnect(ctx context.Context, numbers []string) (*DisconnectTelephoneNumberOrderResponse, error) {
+	path := c.AccountsEndpoint + "/disconnects"
+	req := DisconnectTelephoneNumberOrder{
+		DisconnectTelephoneNumberOrderType: DisconnectTelephoneNumberOrderType{
+			TelephoneNumberList: TelephoneNumberList{
+				TelephoneNumber: numbers,
+			},
+		},
+	}
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodPost, path, &DisconnectTelephoneNumberOrderResponse{}, &req)
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DisconnectTelephoneNumberOrderResponse), nil
+}
+
 // GetOrder returns information regarding the given order.
 func (c *Client) GetOrder(ctx context.Context, id string) (*OrderResponse, error) {
 	path := c.AccountsEndpoint + "/orders/" + id

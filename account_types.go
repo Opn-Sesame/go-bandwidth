@@ -169,3 +169,22 @@ type SearchResult struct {
 	ResultCount         int
 	TelephoneNumberList TelephoneNumberList
 }
+type DisconnectTelephoneNumberOrder struct {
+	Name                               string `xml:"name,omitempty"`
+	DisconnectTelephoneNumberOrderType DisconnectTelephoneNumberOrderType
+}
+type DisconnectTelephoneNumberOrderType struct {
+	TelephoneNumberList TelephoneNumberList
+}
+type DisconnectTelephoneNumberOrderResponse struct {
+	OrderRequest DisconnectOrderRequest
+	OrderStatus  string
+}
+
+type DisconnectOrderRequest struct {
+	XMLName                            xml.Name `xml:"orderRequest"`
+	OrderCreateDate                    time.Time
+	ID                                 string `xml:"id"`
+	DisconnectTelephoneNumberOrderType DisconnectTelephoneNumberOrderType
+	DisconnectMode                     string
+}
