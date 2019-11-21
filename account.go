@@ -181,6 +181,16 @@ func (c *Client) Disconnect(ctx context.Context, numbers []string) (*DisconnectT
 	return result.(*DisconnectTelephoneNumberOrderResponse), nil
 }
 
+// GetDisconnect returns information regarding the given disconnect by ID.
+func (c *Client) GetDisconnect(ctx context.Context, id string) (*DisconnectTelephoneNumberOrderResponse, error) {
+	path := c.AccountsEndpoint + "/disconnects/" + id
+	result, _, err := c.makeAccountsRequest(ctx, http.MethodGet, path, &DisconnectTelephoneNumberOrderResponse{})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DisconnectTelephoneNumberOrderResponse), nil
+}
+
 // GetOrder returns information regarding the given order.
 func (c *Client) GetOrder(ctx context.Context, id string) (*OrderResponse, error) {
 	path := c.AccountsEndpoint + "/orders/" + id

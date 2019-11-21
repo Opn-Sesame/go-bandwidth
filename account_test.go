@@ -459,10 +459,46 @@ func TestDisconnect(t *testing.T) {
 	defer server.Close()
 	result, err := api.Disconnect(context.Background(), numbers)
 	if err != nil {
-		t.Errorf("Failed call of GetOrder(): %v", err)
+		t.Errorf("Failed call of Disconnect(): %v", err)
 		return
 	}
 	expect(t, result.OrderStatus, "RECEIVED")
+	expect(t, result.OrderRequest.ID, id)
+	telephoneNumbers := result.OrderRequest.DisconnectTelephoneNumberOrderType.TelephoneNumberList.TelephoneNumber
+	expect(t, len(telephoneNumbers), len(numbers))
+	expect(t, telephoneNumbers[0], numbers[0])
+	expect(t, telephoneNumbers[1], numbers[1])
+}
+
+func TestGetDisconnect(t *testing.T) {
+	id := "1-2-3-4"
+	numbers := []string{"7341231234", "7341232222"}
+	server, api := startMockServer(t, []RequestHandler{RequestHandler{
+		PathAndQuery: fmt.Sprintf("%s%s/disconnects/%s", accountsPath, testAccountID, id),
+		Method:       http.MethodGet,
+		ContentToSend: fmt.Sprintf(`
+		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+		<DisconnectTelephoneNumberOrderResponse>
+			<orderRequest>
+				<OrderCreateDate>2019-11-21T04:36:33.247Z</OrderCreateDate>
+				<id>%s</id>
+				<DisconnectTelephoneNumberOrderType>
+					<DisconnectMode>normal</DisconnectMode>
+					<TelephoneNumberList>
+						<TelephoneNumber>%s</TelephoneNumber>
+						<TelephoneNumber>%s</TelephoneNumber>
+					</TelephoneNumberList>
+				</DisconnectTelephoneNumberOrderType>
+			</orderRequest>
+			<OrderStatus>COMPLETE</OrderStatus>
+		</DisconnectTelephoneNumberOrderResponse>`, id, numbers[0], numbers[1])}})
+	defer server.Close()
+	result, err := api.GetDisconnect(context.Background(), id)
+	if err != nil {
+		t.Errorf("Failed call of Disconnect(): %v", err)
+		return
+	}
+	expect(t, result.OrderStatus, "COMPLETE")
 	expect(t, result.OrderRequest.ID, id)
 	telephoneNumbers := result.OrderRequest.DisconnectTelephoneNumberOrderType.TelephoneNumberList.TelephoneNumber
 	expect(t, len(telephoneNumbers), len(numbers))
